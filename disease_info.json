@@ -1,0 +1,268 @@
+{
+  "Apple___Apple_scab": {
+    "disease_name": "Apple - Apple scab",
+    "symptoms": "Olive-green to brown velvety spots appear on leaves, often followed by yellowing, distortion, premature leaf drop, and scabby fruit lesions.",
+    "causes": "The fungus Venturia inaequalis survives on fallen infected leaves and spreads during cool, wet spring weather.",
+    "treatment": "Remove infected leaves and fallen debris, prune for airflow, and use a locally approved protective fungicide program when scab pressure is high.",
+    "prevention": "Choose resistant varieties where possible, keep the orchard floor clean, avoid dense canopies, and begin monitoring early in the season."
+  },
+  "Apple___Black_rot": {
+    "disease_name": "Apple - Black rot",
+    "symptoms": "Leaves develop purple-edged brown spots that may look like frog eyes, and fruit can form firm dark rots.",
+    "causes": "The fungus Botryosphaeria obtusa survives in cankers, mummified fruit, and dead wood, then spreads by rain splash.",
+    "treatment": "Prune out cankers and dead wood, remove mummified fruit, and apply recommended fungicides during susceptible growth stages.",
+    "prevention": "Maintain orchard sanitation, prevent tree stress, prune during dry weather, and remove infected material from the site."
+  },
+  "Apple___Cedar_apple_rust": {
+    "disease_name": "Apple - Cedar apple rust",
+    "symptoms": "Bright yellow-orange leaf spots develop, sometimes with raised structures on leaf undersides and reduced fruit quality.",
+    "causes": "A rust fungus alternates between apple and juniper or cedar hosts, spreading spores during wet spring conditions.",
+    "treatment": "Remove nearby infected juniper galls where practical and use labeled fungicides preventively in high-risk areas.",
+    "prevention": "Plant resistant apple cultivars, increase distance from cedar or juniper hosts, and monitor leaves soon after bloom."
+  },
+  "Apple___healthy": {
+    "disease_name": "Apple - healthy",
+    "symptoms": "Leaves show normal green color, good shape, and no obvious spotting, rust, blight, or mildew.",
+    "causes": "Healthy leaves usually reflect suitable nutrition, moisture, sunlight, airflow, and low pathogen pressure.",
+    "treatment": "No disease treatment is needed; continue regular monitoring and avoid unnecessary chemical applications.",
+    "prevention": "Keep trees well pruned, remove fallen debris, water consistently, and scout for early pest or disease symptoms."
+  },
+  "Blueberry___healthy": {
+    "disease_name": "Blueberry - healthy",
+    "symptoms": "Leaves appear evenly colored and firm, with no unusual spotting, scorch, curling, or fungal growth.",
+    "causes": "Healthy blueberry foliage is supported by acidic soil, steady moisture, balanced nutrition, and good airflow.",
+    "treatment": "No disease treatment is required; maintain crop care and monitor for changes.",
+    "prevention": "Maintain acidic soil, mulch shallow roots, avoid waterlogging, prune crowded growth, and remove diseased debris promptly."
+  },
+  "Cherry_(including_sour)___Powdery_mildew": {
+    "disease_name": "Cherry (including sour) - Powdery mildew",
+    "symptoms": "White powdery fungal growth appears on leaves and shoots, with curling, yellowing, and reduced vigor.",
+    "causes": "Powdery mildew is favored by susceptible new growth, shade, moderate humidity, and poor air movement.",
+    "treatment": "Prune crowded shoots, remove heavily infected growth, and apply sulfur or another labeled fungicide when needed.",
+    "prevention": "Improve canopy airflow, avoid excessive nitrogen, plant resistant cultivars where available, and monitor young leaves."
+  },
+  "Cherry_(including_sour)___healthy": {
+    "disease_name": "Cherry (including sour) - healthy",
+    "symptoms": "Leaves are normally shaped and colored without visible mildew, spotting, scorch, or dieback.",
+    "causes": "Healthy leaves are associated with good drainage, suitable nutrition, adequate sunlight, and low disease pressure.",
+    "treatment": "No treatment is needed beyond normal orchard care.",
+    "prevention": "Prune for airflow, remove fallen leaves and fruit, water during drought, and inspect regularly for early symptoms."
+  },
+  "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": {
+    "disease_name": "Corn (maize) - Cercospora leaf spot Gray leaf spot",
+    "symptoms": "Long rectangular gray to tan lesions appear between leaf veins and may merge under heavy disease pressure.",
+    "causes": "Cercospora fungi survive in corn residue and spread during warm, humid weather with extended leaf wetness.",
+    "treatment": "Use resistant hybrids, rotate away from corn, manage residue, and apply labeled fungicides when disease reaches economic thresholds.",
+    "prevention": "Rotate crops, reduce infected residue, select resistant hybrids, and avoid overly dense planting."
+  },
+  "Corn_(maize)___Common_rust_": {
+    "disease_name": "Corn (maize) - Common rust",
+    "symptoms": "Small cinnamon-brown pustules form on both leaf surfaces and may darken as the disease matures.",
+    "causes": "Rust spores blow in from infected areas and develop quickly in cool to moderate, humid conditions.",
+    "treatment": "Most cases need no treatment, but fungicides may be justified on susceptible hybrids when disease appears early and pressure is high.",
+    "prevention": "Plant resistant hybrids, scout fields regularly, and maintain balanced fertility to reduce crop stress."
+  },
+  "Corn_(maize)___Northern_Leaf_Blight": {
+    "disease_name": "Corn (maize) - Northern Leaf Blight",
+    "symptoms": "Large cigar-shaped gray-green to tan lesions develop on leaves and can reduce photosynthetic area.",
+    "causes": "The fungus Exserohilum turcicum survives in corn residue and spreads in humid, moderate-temperature weather.",
+    "treatment": "Use resistant hybrids, rotate crops, manage residue, and apply fungicides when disease risk and crop stage justify it.",
+    "prevention": "Rotate away from corn, choose resistant hybrids, bury or break down residue, and scout before tasseling."
+  },
+  "Corn_(maize)___healthy": {
+    "disease_name": "Corn (maize) - healthy",
+    "symptoms": "Leaves are green and upright with no major lesions, rust pustules, blighting, or nutrient-stress patterns.",
+    "causes": "Healthy corn foliage reflects good hybrid selection, balanced fertility, adequate water, and low disease pressure.",
+    "treatment": "No disease treatment is required; continue scouting and maintain crop nutrition.",
+    "prevention": "Use crop rotation, balanced fertilization, residue management, and regular field monitoring."
+  },
+  "Grape___Black_rot": {
+    "disease_name": "Grape - Black rot",
+    "symptoms": "Leaves show tan circular spots with dark margins, and berries can shrivel into hard black mummies.",
+    "causes": "The fungus Guignardia bidwellii survives in mummified fruit and infected canes, spreading during warm, wet weather.",
+    "treatment": "Remove mummified fruit and infected tissue, prune for airflow, and apply preventive fungicides during early growth stages.",
+    "prevention": "Sanitize vineyards, train vines for airflow, remove wild grape hosts nearby, and protect young tissue during rainy periods."
+  },
+  "Grape___Esca_(Black_Measles)": {
+    "disease_name": "Grape - Esca (Black Measles)",
+    "symptoms": "Leaves may show interveinal striping or scorch, and berries can develop small dark measle-like spots.",
+    "causes": "Esca is associated with wood-infecting fungi that colonize pruning wounds and older vine trunks.",
+    "treatment": "Remove severely affected vines or cordons, protect pruning wounds where recommended, and avoid spreading infected wood.",
+    "prevention": "Prune during dry conditions, disinfect tools when practical, protect large wounds, and maintain vine vigor."
+  },
+  "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)": {
+    "disease_name": "Grape - Leaf blight (Isariopsis Leaf Spot)",
+    "symptoms": "Angular brown leaf spots form between veins and may cause blighting, drying, and premature leaf drop.",
+    "causes": "The pathogen survives on infected debris and spreads with humid weather and splashing rain.",
+    "treatment": "Remove infected leaves, improve canopy airflow, and use locally recommended fungicides when disease pressure increases.",
+    "prevention": "Prune and train vines for ventilation, remove debris, avoid overhead irrigation, and scout during wet periods."
+  },
+  "Grape___healthy": {
+    "disease_name": "Grape - healthy",
+    "symptoms": "Leaves are normally green and expanded without lesions, mildew, scorch, or abnormal mottling.",
+    "causes": "Healthy grape foliage is supported by good sunlight, airflow, drainage, pruning, and balanced nutrition.",
+    "treatment": "No disease treatment is needed; maintain vineyard hygiene and routine scouting.",
+    "prevention": "Prune for airflow, remove infected debris, manage irrigation, and monitor after rain or high humidity."
+  },
+  "Orange___Haunglongbing_(Citrus_greening)": {
+    "disease_name": "Orange - Haunglongbing (Citrus greening)",
+    "symptoms": "Leaves show blotchy yellow mottling, shoots may decline, fruit can be small, bitter, misshapen, and unevenly colored.",
+    "causes": "Citrus greening is caused by phloem-limited bacteria spread mainly by Asian citrus psyllids and infected plant material.",
+    "treatment": "There is no cure; remove infected trees where required, manage psyllids, and use certified disease-free planting stock.",
+    "prevention": "Control psyllid vectors, buy certified nursery trees, monitor frequently, and follow regional citrus greening regulations."
+  },
+  "Peach___Bacterial_spot": {
+    "disease_name": "Peach - Bacterial spot",
+    "symptoms": "Leaves develop small angular dark spots that may fall out, giving a shot-hole appearance, and fruit may develop pits.",
+    "causes": "Bacteria spread by wind-driven rain, infected twigs, and wet conditions, especially on susceptible cultivars.",
+    "treatment": "Use resistant varieties, prune for airflow, and apply copper or antibiotic products only according to local label guidance.",
+    "prevention": "Avoid overhead irrigation, reduce tree stress, select resistant cultivars, and maintain balanced fertility."
+  },
+  "Peach___healthy": {
+    "disease_name": "Peach - healthy",
+    "symptoms": "Leaves are evenly colored with no shot holes, spots, curling, mildew, or scorch.",
+    "causes": "Healthy foliage is linked to good site drainage, balanced nutrition, pest monitoring, and suitable pruning.",
+    "treatment": "No disease treatment is needed; continue normal care.",
+    "prevention": "Prune for airflow, irrigate during drought, remove diseased debris, and inspect leaves and fruit regularly."
+  },
+  "Pepper,_bell___Bacterial_spot": {
+    "disease_name": "Pepper, bell - Bacterial spot",
+    "symptoms": "Leaves show small water-soaked spots that turn brown, often with yellow halos; severe infections cause leaf drop.",
+    "causes": "Bacteria spread through infected seed or transplants, splashing water, tools, and handling wet plants.",
+    "treatment": "Remove infected plants or leaves, avoid overhead watering, improve spacing, and use copper products only as locally recommended.",
+    "prevention": "Use certified seed, rotate away from peppers and tomatoes, sanitize tools, and avoid working plants when wet."
+  },
+  "Pepper,_bell___healthy": {
+    "disease_name": "Pepper, bell - healthy",
+    "symptoms": "Leaves appear firm and green with no water-soaked spots, yellow halos, wilting, or distortion.",
+    "causes": "Healthy pepper foliage results from clean planting material, warm conditions, proper irrigation, and balanced nutrients.",
+    "treatment": "No disease treatment is needed.",
+    "prevention": "Rotate crops, avoid overhead watering, mulch to reduce splash, and monitor for insects and early leaf spots."
+  },
+  "Potato___Early_blight": {
+    "disease_name": "Potato - Early blight",
+    "symptoms": "Older leaves develop brown target-like spots with concentric rings, yellowing, and possible defoliation.",
+    "causes": "Alternaria fungi survive in debris and are favored by warm weather, leaf wetness, and plant stress.",
+    "treatment": "Remove infected debris, maintain fertility and irrigation, and apply labeled fungicides when disease pressure warrants.",
+    "prevention": "Rotate away from potatoes and tomatoes, use healthy seed potatoes, mulch to reduce splash, and avoid plant stress."
+  },
+  "Potato___Late_blight": {
+    "disease_name": "Potato - Late blight",
+    "symptoms": "Leaves develop water-soaked gray-green lesions that turn brown, often with white growth on undersides in humid weather.",
+    "causes": "Phytophthora infestans spreads rapidly in cool, wet conditions through spores from infected plants or tubers.",
+    "treatment": "Remove infected plants, avoid moving infected material, and use a recommended fungicide program immediately in outbreak conditions.",
+    "prevention": "Plant certified seed, destroy volunteer potatoes, improve airflow, avoid overhead irrigation, and monitor local late blight alerts."
+  },
+  "Potato___healthy": {
+    "disease_name": "Potato - healthy",
+    "symptoms": "Leaves are green and vigorous without target spots, water-soaked lesions, wilting, or abnormal yellowing.",
+    "causes": "Healthy potato foliage is supported by clean seed, crop rotation, balanced fertility, and adequate water.",
+    "treatment": "No disease treatment is required.",
+    "prevention": "Use certified seed potatoes, rotate crops, hill plants properly, manage irrigation, and scout regularly."
+  },
+  "Raspberry___healthy": {
+    "disease_name": "Raspberry - healthy",
+    "symptoms": "Leaves show normal color and shape without spots, scorch, cane dieback, or abnormal curling.",
+    "causes": "Healthy raspberry plants benefit from good drainage, airflow, pruning, and low pest pressure.",
+    "treatment": "No disease treatment is required.",
+    "prevention": "Prune spent canes, remove infected debris, avoid wet foliage, and maintain weed control and airflow."
+  },
+  "Soybean___healthy": {
+    "disease_name": "Soybean - healthy",
+    "symptoms": "Leaves are evenly green and well formed with no major spotting, blight, mildew, or insect injury.",
+    "causes": "Healthy soybean foliage reflects suitable variety choice, balanced fertility, adequate moisture, and low disease pressure.",
+    "treatment": "No disease treatment is needed.",
+    "prevention": "Rotate crops, use disease-resistant varieties, monitor fields, manage residue, and avoid unnecessary pesticide use."
+  },
+  "Squash___Powdery_mildew": {
+    "disease_name": "Squash - Powdery mildew",
+    "symptoms": "White powdery patches appear on leaves and stems, followed by yellowing, browning, and reduced plant vigor.",
+    "causes": "Powdery mildew spreads by airborne spores and is favored by dense growth, shade, and moderate humidity.",
+    "treatment": "Remove badly infected leaves, improve airflow, and use sulfur, potassium bicarbonate, horticultural oil, or labeled fungicides as appropriate.",
+    "prevention": "Plant resistant varieties, space plants well, avoid excess nitrogen, and begin monitoring before fruiting."
+  },
+  "Strawberry___Leaf_scorch": {
+    "disease_name": "Strawberry - Leaf scorch",
+    "symptoms": "Small purple spots enlarge and merge, giving leaves a scorched or reddish-brown appearance.",
+    "causes": "The fungus Diplocarpon earlianum survives on infected leaves and spreads in wet, humid conditions.",
+    "treatment": "Remove infected foliage after harvest, improve airflow, and use labeled fungicides if disease is severe.",
+    "prevention": "Use disease-free plants, avoid overhead irrigation, renovate beds properly, and remove old infected leaves."
+  },
+  "Strawberry___healthy": {
+    "disease_name": "Strawberry - healthy",
+    "symptoms": "Leaves are green and vigorous without scorch, spots, mildew, or abnormal curling.",
+    "causes": "Healthy plants are supported by clean transplants, good drainage, proper spacing, and balanced nutrition.",
+    "treatment": "No disease treatment is needed.",
+    "prevention": "Use clean planting stock, mulch to reduce splash, avoid wet foliage, and remove old leaves after harvest."
+  },
+  "Tomato___Bacterial_spot": {
+    "disease_name": "Tomato - Bacterial spot",
+    "symptoms": "Small dark water-soaked leaf spots develop, often with yellow halos, and fruit may show raised scabby lesions.",
+    "causes": "Bacteria spread through infected seed, transplants, splashing water, tools, and warm wet weather.",
+    "treatment": "Remove infected tissue, avoid overhead irrigation, improve spacing, and use copper products only under local recommendations.",
+    "prevention": "Use certified seed and transplants, rotate crops, sanitize tools, mulch soil, and avoid handling wet plants."
+  },
+  "Tomato___Early_blight": {
+    "disease_name": "Tomato - Early blight",
+    "symptoms": "Older leaves show brown target-like spots with yellowing; lower leaves may die and drop.",
+    "causes": "Alternaria fungi survive in soil and plant debris and spread during warm, humid conditions.",
+    "treatment": "Remove lower infected leaves, mulch soil, stake plants, and use labeled fungicides when needed.",
+    "prevention": "Rotate crops, avoid overhead watering, space plants well, remove debris, and keep foliage off the soil."
+  },
+  "Tomato___Late_blight": {
+    "disease_name": "Tomato - Late blight",
+    "symptoms": "Leaves develop large water-soaked lesions that turn brown, with possible white growth during humid weather.",
+    "causes": "Phytophthora infestans spreads quickly in cool, wet weather from infected plants, volunteers, or windborne spores.",
+    "treatment": "Remove infected plants promptly and follow local late blight fungicide guidance during outbreaks.",
+    "prevention": "Use resistant varieties, improve airflow, avoid overhead watering, destroy volunteers, and track local disease alerts."
+  },
+  "Tomato___Leaf_Mold": {
+    "disease_name": "Tomato - Leaf Mold",
+    "symptoms": "Yellow patches appear on upper leaf surfaces with olive-gray mold on undersides, especially in humid environments.",
+    "causes": "Passalora fulva develops in high humidity, poor ventilation, and protected growing conditions such as greenhouses.",
+    "treatment": "Increase ventilation, remove infected leaves, reduce humidity, and apply labeled fungicides if needed.",
+    "prevention": "Space plants well, ventilate greenhouses, avoid wet foliage, use resistant varieties, and remove crop debris."
+  },
+  "Tomato___Septoria_leaf_spot": {
+    "disease_name": "Tomato - Septoria leaf spot",
+    "symptoms": "Many small circular spots with gray centers and dark borders appear on lower leaves, causing yellowing and leaf drop.",
+    "causes": "Septoria fungi survive in debris and spread by splashing water during warm, wet weather.",
+    "treatment": "Remove infected lower leaves, mulch, stake plants, and apply labeled fungicides when disease is active.",
+    "prevention": "Rotate crops, remove tomato debris, avoid overhead watering, improve spacing, and control weeds in the nightshade family."
+  },
+  "Tomato___Spider_mites Two-spotted_spider_mite": {
+    "disease_name": "Tomato - Spider mites Two-spotted spider mite",
+    "symptoms": "Leaves show fine stippling, bronzing, webbing on undersides, curling, and possible leaf drop.",
+    "causes": "Two-spotted spider mites multiply rapidly in hot, dry conditions and on stressed plants.",
+    "treatment": "Spray leaf undersides with water, reduce plant stress, encourage beneficial insects, and use insecticidal soap or miticide when needed.",
+    "prevention": "Avoid drought stress, reduce dust, inspect leaf undersides, and avoid broad-spectrum insecticides that harm predators."
+  },
+  "Tomato___Target_Spot": {
+    "disease_name": "Tomato - Target Spot",
+    "symptoms": "Leaves develop brown spots with faint concentric rings, often surrounded by yellow tissue; fruit lesions may occur.",
+    "causes": "Corynespora cassiicola survives in debris and spreads in warm, humid, wet conditions.",
+    "treatment": "Remove infected leaves, improve airflow, avoid overhead irrigation, and apply labeled fungicides if disease progresses.",
+    "prevention": "Rotate crops, remove debris, stake or prune plants, mulch soil, and use healthy transplants."
+  },
+  "Tomato___Tomato_Yellow_Leaf_Curl_Virus": {
+    "disease_name": "Tomato - Tomato Yellow Leaf Curl Virus",
+    "symptoms": "Leaves curl upward and yellow, plants become stunted, and fruit set may be poor.",
+    "causes": "The virus is spread mainly by whiteflies and through infected transplants.",
+    "treatment": "There is no cure; remove infected plants and manage whiteflies with integrated pest management.",
+    "prevention": "Use resistant varieties, control whiteflies, remove weeds and infected plants, and use insect netting where practical."
+  },
+  "Tomato___Tomato_mosaic_virus": {
+    "disease_name": "Tomato - Tomato mosaic virus",
+    "symptoms": "Leaves show mosaic mottling, curling, distortion, reduced growth, and sometimes uneven fruit ripening.",
+    "causes": "The virus spreads through contaminated hands, tools, seed, plant debris, and infected transplants.",
+    "treatment": "There is no cure; remove infected plants and sanitize tools and hands before handling healthy plants.",
+    "prevention": "Use virus-free seed, disinfect tools, avoid tobacco contamination around tomatoes, and remove crop debris."
+  },
+  "Tomato___healthy": {
+    "disease_name": "Tomato - healthy",
+    "symptoms": "Leaves are green and normally shaped without spots, yellowing, curling, mildew, or mite damage.",
+    "causes": "Healthy tomato foliage comes from clean transplants, good airflow, proper watering, balanced fertility, and regular pest monitoring.",
+    "treatment": "No disease treatment is required; continue normal care and scouting.",
+    "prevention": "Rotate crops, mulch soil, stake plants, avoid overhead irrigation, prune for airflow, and inspect leaves weekly."
+  }
+}
