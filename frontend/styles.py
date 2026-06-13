@@ -85,28 +85,35 @@ def load_css():
             padding: 0 !important;
         }
 
-        /* Remove Streamlit's hidden bottom toolbar container that reserves empty space */
+        /* --- Hide Streamlit Branding & Chrome Completely --- */
         [data-testid="stBottom"],
-        [data-testid="stBottomBlockContainer"] {
+        [data-testid="stBottomBlockContainer"],
+        .stBottom {
             display: none !important;
+            height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
 
-        /* --- Streamlit Chrome & Deployment Badges --- */
         #MainMenu,
         footer,
         header,
+        .stApp > header,
         [data-testid="stToolbar"],
         [data-testid="stDeployButton"],
+        [data-testid="manage-app-button"],
         [data-testid="stFooter"],
         [data-testid="stDecoration"],
         [data-testid="stStatusWidget"],
         [data-testid="stHeader"],
         [data-testid="stAppHeader"],
+        [data-testid="stSidebarCollapsedControl"],
         [class^="viewerBadge_"],
         [class*="viewerBadge"] {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         /* --- Global 5-Layer Background CSS --- */
@@ -246,9 +253,10 @@ def load_css():
 
         /* Streamlit main block container constraints */
         .block-container,
-        [data-testid="stAppViewBlockContainer"] {
+        [data-testid="stAppViewBlockContainer"],
+        .stMainBlockContainer {
             max-width: 1400px !important;
-            padding-top: 2rem !important;
+            padding-top: 110px !important; /* Adjusted for the fixed navbar */
             padding-bottom: 0 !important;
             margin-bottom: 0 !important;
         }
@@ -1821,8 +1829,6 @@ def load_css():
         @media (max-width: 375px) {
             :root { --nav-gap: 14px; --nav-link-fs: 14px; }
         }
-
-        .block-container { padding-top: 110px !important; }
 
 
         /* --- Auto-hiding Success Message --- */
