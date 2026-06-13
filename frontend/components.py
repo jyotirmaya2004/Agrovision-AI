@@ -1,6 +1,14 @@
 import streamlit as st
 
 
+def get_confidence_color(confidence: float) -> str:
+    if confidence >= 90:
+        return "#22c55e"
+    elif confidence >= 70:
+        return "#fbbf24"
+    else:
+        return "#ef4444"
+
 def landing_hero() -> None:
     st.html(
         """
@@ -44,7 +52,7 @@ def landing_hero() -> None:
                             </div>
                             <div class="floating-card fc-2">
                                 <div class="fc-title">Confidence</div>
-                                <div class="fc-val text-accent">98.4%</div>
+                                <div class="fc-val text-green">98.4%</div>
                             </div>
                             <div class="floating-card fc-3">
                                 <div class="fc-title">Severity Status</div>
@@ -94,15 +102,13 @@ def empty_placeholder(icon: str, title: str, description: str = "") -> None:
 
 def prediction_card(disease, confidence):
     confidence = float(confidence)
+    badge_color = get_confidence_color(confidence)
 
     if confidence >= 90:
-        badge_color = "#22c55e"
         badge_text = "High Confidence"
     elif confidence >= 70:
-        badge_color = "#fbbf24"
         badge_text = "Moderate Confidence"
     else:
-        badge_color = "#ef4444"
         badge_text = "Low Confidence"
 
     st.html(f"""
@@ -115,7 +121,7 @@ def prediction_card(disease, confidence):
             <span style="background: {badge_color}22; color: {badge_color}; padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1px solid {badge_color}44;">{badge_text}</span>
         </div>
         <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;">
-            <h2 style="margin: 0; font-size: 48px; font-weight: 800; color: var(--leaf-primary); line-height: 1;">{confidence:.1f}%</h2>
+            <h2 style="margin: 0; font-size: 48px; font-weight: 800; color: {badge_color}; line-height: 1;">{confidence:.1f}%</h2>
             <span style="color: var(--leaf-muted); font-size: 14px;">Confidence Score</span>
         </div>
     </div>
@@ -127,10 +133,12 @@ def prediction_card(disease, confidence):
 def top_predictions_card(predictions):
     html_content = '<div class="glass-card" style="padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: center;">'
     for disease, score in predictions:
+        score_val = float(score)
+        color = get_confidence_color(score_val)
         html_content += f"""
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
             <span style="color: var(--leaf-text); font-weight: 500;">{disease}</span>
-            <span style="color: var(--leaf-primary); font-family: 'Poppins', sans-serif; font-weight: 600;">{float(score):.1f}%</span>
+            <span style="color: {color}; font-family: 'Poppins', sans-serif; font-weight: 600;">{score_val:.1f}%</span>
         </div>
         """
     html_content += '</div>'

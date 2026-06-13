@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-from frontend.components import page_header
+from frontend.components import page_header, get_confidence_color
 from frontend.styles import load_css
 from frontend.ui import render_navbar
 from frontend.chatbot import chatbot_ui
@@ -85,11 +85,21 @@ try:
         df = pd.DataFrame(columns=["id", "username", "timestamp", "disease", "confidence", "image_url", "user_id"])
 
     st.write(f"### Total Records: {len(df)}")
+
+    def color_confidence(val):
+        try:
+            return f'color: {get_confidence_color(float(val))}'
+        except Exception:
+            return ''
+
+    styled_df = df.style.map(color_confidence, subset=['confidence'])
+
     st.dataframe(
-        df,
+        styled_df,
         use_container_width=True,
         column_config={
-            "image_url": st.column_config.ImageColumn("Uploaded Image")
+            "image_url": st.column_config.ImageColumn("Uploaded Image"),
+            "confidence": st.column_config.NumberColumn("Confidence", format="%.2f%%")
         }
     )
 

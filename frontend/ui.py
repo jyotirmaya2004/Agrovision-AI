@@ -16,6 +16,7 @@ from backend.predict_two_stage import PredictionError, predict_two_stage
 from frontend.chatbot import chatbot_ui
 from frontend.components import (
     empty_placeholder,
+    get_confidence_color,
     landing_hero,
     prediction_card,
     section_title,
@@ -706,12 +707,12 @@ def _generate_report_pdf(image_bytes, prediction, disease_info):
 
     data = [
         [Paragraph("<b>Diagnosed Disease</b>", styles["Normal"]), Paragraph(disease, styles["Normal"])],
-        [Paragraph("<b>Model Confidence</b>", styles["Normal"]), Paragraph(f"{confidence}%", styles["Normal"])]
+        [Paragraph("<b>Model Confidence</b>", styles["Normal"]), Paragraph(f"<font color='{get_confidence_color(confidence)}'><b>{confidence}%</b></font>", styles["Normal"])]
     ]
 
     top_preds = prediction.get("top_predictions", [])
     if len(top_preds) > 1:
-        alts = ", ".join([f"{p['disease']} ({p['confidence']}%)" for p in top_preds[1:]])
+        alts = ", ".join([f"{p['disease']} (<font color='{get_confidence_color(p['confidence'])}'>{p['confidence']}%</font>)" for p in top_preds[1:]])
         data.append([Paragraph("<b>Other Predictions</b>", styles["Normal"]), Paragraph(alts, styles["Normal"])])
 
     t = Table(data, colWidths=[1.5*inch, 4.5*inch])
@@ -786,7 +787,8 @@ def _generate_history_pdf(history_data):
         for item in history_data:
             dt = item.get("Timestamp", "N/A")
             disease = item.get("Disease", "Unknown")
-            conf = f"{item.get('Confidence', 0)}%"
+            conf_val = item.get("Confidence", 0)
+            conf = f"<font color='{get_confidence_color(conf_val)}'><b>{conf_val}%</b></font>"
 
             img_element = Paragraph("No Image", styles["Normal"])
             img_url = item.get("Image_URL")
@@ -1069,11 +1071,25 @@ def render_history_section():
         st.info("No history yet. Analyze a leaf image to see records here.")
         return
 
+    import pandas as pd
+
+    df = pd.DataFrame(history)
+
+    def color_confidence(val):
+        try:
+            return f'color: {get_confidence_color(float(val))}'
+        except Exception:
+            return ''
+
+    # Apply color highlighting across the entire column
+    styled_df = df.style.map(color_confidence, subset=['Confidence'])
+
     st.dataframe(
-        history,
+        styled_df,
         use_container_width=True,
         column_config={
-            "Image_URL": st.column_config.ImageColumn("Uploaded Image")
+            "Image_URL": st.column_config.ImageColumn("Uploaded Image"),
+            "Confidence": st.column_config.NumberColumn("Confidence", format="%.2f%%")
         }
     )
 

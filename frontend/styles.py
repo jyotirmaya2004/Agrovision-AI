@@ -662,6 +662,8 @@ def load_css():
         }
         .text-green { color: #22c55e; }
         .text-accent { color: #34d399; }
+        .text-yellow { color: #fbbf24; }
+        .text-red { color: #ef4444; }
         .fc-badge {
             display: inline-block;
             background: rgba(234, 179, 8, 0.15);
