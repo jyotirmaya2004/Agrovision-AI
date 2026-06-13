@@ -989,77 +989,81 @@ def render_prediction_section(image_file):
     if not result:
         return
 
-    st.success("Analysis Complete!")
+    dashboard_container = st.container()
+    with dashboard_container:
+        st.markdown('<div class="dashboard-slide-up-marker"></div>', unsafe_allow_html=True)
 
-    if result.get("validation_warning"):
-        st.warning(result["validation_warning"])
+        st.success("Analysis Complete!")
 
-    # Dashboard Row 1
-    col_diag, col_top = st.columns([1, 1], gap="large")
-    with col_diag:
-        section_title("Diagnosis Result", "fa-virus")
-        prediction_card(result["disease"], result["confidence"])
-    with col_top:
-        section_title("Alternate Probabilities", "fa-layer-group")
-        top_predictions_card([(pred["disease"], pred["confidence"]) for pred in result["top_predictions"]])
+        if result.get("validation_warning"):
+            st.warning(result["validation_warning"])
 
-    if show_debug:
-        st.json(result["leaf_validation"])
+        # Dashboard Row 1
+        col_diag, col_top = st.columns([1, 1], gap="large")
+        with col_diag:
+            section_title("Diagnosis Result", "fa-virus")
+            prediction_card(result["disease"], result["confidence"])
+        with col_top:
+            section_title("Alternate Probabilities", "fa-layer-group")
+            top_predictions_card([(pred["disease"], pred["confidence"]) for pred in result["top_predictions"]])
 
-    st.html("<br>")
-    section_title("Diagnosis & Treatment Hub", "fa-briefcase-medical")
-    disease_info = get_disease_details(result["class_name"])
+        if show_debug:
+            st.json(result["leaf_validation"])
 
-    tab_sym, tab_treat, tab_prev, tab_comp = st.tabs(["Symptoms & Causes", "Treatment Plans", "Prevention", "Similar Diseases"])
+        st.html("<br>")
+        section_title("Diagnosis & Treatment Hub", "fa-briefcase-medical")
+        disease_info = get_disease_details(result["class_name"])
 
-    with tab_sym:
-        st.write("### Disease Description & Symptoms")
-        st.write(disease_info.get("symptoms", "No symptom information available."))
-        st.write("### Primary Causes")
-        st.write(disease_info.get("causes", "No cause information available."))
+        tab_sym, tab_treat, tab_prev, tab_comp = st.tabs(["Symptoms & Causes", "Treatment Plans", "Prevention", "Similar Diseases"])
 
-    with tab_treat:
-        st.write("### AI Recommended Treatments")
-        st.info("The following treatments are scientifically recommended based on your diagnosis.")
-        st.write(disease_info.get("treatment", "No treatment information available."))
-        col_c1, col_c2 = st.columns(2)
-        with col_c1:
-            st.metric("Estimated Treatment Cost", "Low - Moderate")
-        with col_c2:
-            st.metric("Effectiveness Score", "High (85-95%)")
+        with tab_sym:
+            st.write("### Disease Description & Symptoms")
+            st.write(disease_info.get("symptoms", "No symptom information available."))
+            st.write("### Primary Causes")
+            st.write(disease_info.get("causes", "No cause information available."))
 
-    with tab_prev:
-        st.write("### Best Practices & Prevention")
-        st.write(disease_info.get("prevention", "No prevention information available."))
-        st.success("Follow these practices to prevent future outbreaks and maintain crop health.")
+        with tab_treat:
+            st.write("### AI Recommended Treatments")
+            st.info("The following treatments are scientifically recommended based on your diagnosis.")
+            st.write(disease_info.get("treatment", "No treatment information available."))
+            col_c1, col_c2 = st.columns(2)
+            with col_c1:
+                st.metric("Estimated Treatment Cost", "Low - Moderate")
+            with col_c2:
+                st.metric("Effectiveness Score", "High (85-95%)")
 
-    with tab_comp:
-        st.write("### Disease Comparison")
-        st.write("Comparing current diagnosis against similar pathogens.")
-        if len(result["top_predictions"]) > 1:
-            alt_disease = result["top_predictions"][1]["disease"]
-            st.warning(f"**Similar Match:** {alt_disease}. Monitor for overlapping symptoms.")
+        with tab_prev:
+            st.write("### Best Practices & Prevention")
+            st.write(disease_info.get("prevention", "No prevention information available."))
+            st.success("Follow these practices to prevent future outbreaks and maintain crop health.")
+
+        with tab_comp:
+            st.write("### Disease Comparison")
+            st.write("Comparing current diagnosis against similar pathogens.")
+            if len(result["top_predictions"]) > 1:
+                alt_disease = result["top_predictions"][1]["disease"]
+                st.warning(f"**Similar Match:** {alt_disease}. Monitor for overlapping symptoms.")
+            else:
+                st.write("No similar diseases found for comparison.")
+
+        st.html("<br>")
+        section_title("Diagnosis Report", "fa-file-pdf")
+        st.info("Save a detailed PDF report of this diagnosis, including the uploaded image and treatment guidelines.")
+
+        image_bytes = image_file.getvalue() if image_file else None
+        pdf_bytes = _generate_report_pdf(image_bytes, result, disease_info)
+
+        if pdf_bytes:
+            safe_name = re.sub(r'[^a-zA-Z0-9]+', '_', result['disease']).strip('_').lower()
+            if st.download_button(
+                label="Download Full Report Card",
+                data=pdf_bytes,
+                file_name=f"plantexa_report_{safe_name}.pdf",
+                mime="application/pdf",
+            ):
+                st.markdown('<div class="success-msg-anim"><i class="fa-solid fa-circle-check"></i> Report downloaded successfully!</div>', unsafe_allow_html=True)
         else:
-            st.write("No similar diseases found for comparison.")
-
-    st.html("<br>")
-    section_title("Diagnosis Report", "fa-file-pdf")
-    st.info("Save a detailed PDF report of this diagnosis, including the uploaded image and treatment guidelines.")
-
-    image_bytes = image_file.getvalue() if image_file else None
-    pdf_bytes = _generate_report_pdf(image_bytes, result, disease_info)
-
-    if pdf_bytes:
-        safe_name = re.sub(r'[^a-zA-Z0-9]+', '_', result['disease']).strip('_').lower()
-        if st.download_button(
-            label="Download Full Report Card",
-            data=pdf_bytes,
-            file_name=f"plantexa_report_{safe_name}.pdf",
-            mime="application/pdf",
-        ):
-            st.markdown('<div class="success-msg-anim"><i class="fa-solid fa-circle-check"></i> Report downloaded successfully!</div>', unsafe_allow_html=True)
-    else:
-        st.warning("ReportLab is required to generate PDF reports. Please run `pip install reportlab`.")
+            st.warning("ReportLab is required to generate PDF reports. Please run `pip install reportlab`.")
 
 def render_history_section():
     section_title("Prediction History", "fa-clock-rotate-left")

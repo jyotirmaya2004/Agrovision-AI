@@ -16,6 +16,17 @@ Keep your responses extremely concise, using short bullet points and direct, act
 If the user asks about topics outside of agriculture or botany, politely decline and steer the conversation back to plant health.
 """.strip()
 
+AVATAR_ROLES = {
+    "🧑‍🌾": "Farmer",
+    "👩‍🌾": "Gardener",
+    "👨‍🌾": "Agronomist",
+    "🪴": "Plant Lover",
+    "🌻": "Sunflower",
+    "🌵": "Cactus",
+    "🌾": "Botanist",
+    "🤖": "AI Bot"
+}
+
 
 def _get_float_env(name: str, default: float) -> float:
     try:
@@ -80,14 +91,35 @@ def _chat_with_nvidia_stream():
         return
 
     system_prompt = SYSTEM_PROMPT
+
+    username = st.session_state.get("username")
+    avatar = st.session_state.get("avatar")
+    if username:
+        role = AVATAR_ROLES.get(avatar, "Plant Enthusiast")
+        system_prompt += f"\n\nUser Context: You are talking to {username}, whose profile indicates they are a {role} (Avatar: {avatar}). Personalize your greetings and tailor your advice to match their experience level and perspective when appropriate."
+
     prediction = st.session_state.get("prediction")
     if prediction and prediction.get("disease"):
         disease = prediction["disease"]
         confidence = prediction.get("confidence", 0)
+
+        try:
+            conf_val = float(confidence)
+        except (ValueError, TypeError):
+            conf_val = 0.0
+
+        if conf_val >= 90:
+            st_color = "green"
+        elif conf_val >= 70:
+            st_color = "orange"
+        else:
+            st_color = "red"
+
         system_prompt += (
             f"\n\nCurrent Context: The user just analyzed a plant leaf. "
             f"The AI model diagnosed it as '{disease}' with {confidence}% confidence. "
-            f"Tailor your advice to this context if the user's question is ambiguous."
+            f"Tailor your advice to this context if the user's question is ambiguous. "
+            f"IMPORTANT: Whenever you mention the confidence percentage, wrap it exactly in this markdown format: :{st_color}[{confidence}%]"
         )
 
     messages = [{"role": "system", "content": system_prompt}]
@@ -190,6 +222,12 @@ def _generate_pdf_transcript(messages):
         text = re.sub(r'\*(.*?)\*', r'<i>\1</i>', text)
         # Parse markdown headings (##, ###, ####) and convert to bold text
         text = re.sub(r'(?m)^#{1,6}\s+(.*)', r'<b>\1</b>', text)
+
+        # Parse Streamlit color tags to ReportLab font tags
+        text = re.sub(r':green\[(.*?)\]', r'<font color="#22c55e">\1</font>', text)
+        text = re.sub(r':orange\[(.*?)\]', r'<font color="#fbbf24">\1</font>', text)
+        text = re.sub(r':red\[(.*?)\]', r'<font color="#ef4444">\1</font>', text)
+
         # Strip emojis and unsupported symbols to prevent PDF rendering errors/black boxes
         text = re.sub(r'[^\x00-\x7F\u0080-\u00FF\u2013\u2014\u2018-\u201D\u2022]', '', text)
         return text

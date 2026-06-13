@@ -2261,6 +2261,55 @@ def load_css():
             .footer-bottom { flex-direction: column; text-align: center; }
             .f-link:hover, .f-social:hover { transform: none; }
         }
+
+        @keyframes growBar {
+            0% { transform: scaleX(0); }
+            100% { transform: scaleX(1); }
+        }
+
+        @keyframes popInCard {
+            0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .pop-in-card {
+            opacity: 0;
+            animation: popInCard 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+
+        @keyframes dashboardSlideUp {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .dashboard-slide-up-marker) {
+            opacity: 0;
+            animation: dashboardSlideUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+        .dashboard-slide-up-marker { display: none; }
         </style>
+        <script>
+        const initCounters = () => {
+            document.querySelectorAll('.count-up').forEach(el => {
+                if(el.dataset.animated) return;
+                el.dataset.animated = 'true';
+                let target = parseFloat(el.dataset.target);
+                let duration = 1000;
+                let start = performance.now();
+                let update = (t) => {
+                    let p = Math.min((t - start) / duration, 1);
+                    let ease = 1 - Math.pow(1 - p, 4); // Quartic ease out
+                    el.innerText = (ease * target).toFixed(1) + '%';
+                    if(p < 1) requestAnimationFrame(update);
+                    else el.innerText = target.toFixed(1) + '%';
+                };
+                requestAnimationFrame(update);
+            });
+        };
+        // Initial run
+        setTimeout(initCounters, 100);
+        if (!window.counterObserver) {
+            window.counterObserver = new MutationObserver(initCounters);
+            window.counterObserver.observe(document.body, { childList: true, subtree: true });
+        }
+        </script>
         """
     )

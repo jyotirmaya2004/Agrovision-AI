@@ -121,24 +121,30 @@ def prediction_card(disease, confidence):
             <span style="background: {badge_color}22; color: {badge_color}; padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1px solid {badge_color}44;">{badge_text}</span>
         </div>
         <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;">
-            <h2 style="margin: 0; font-size: 48px; font-weight: 800; color: {badge_color}; line-height: 1;">{confidence:.1f}%</h2>
+            <h2 class="count-up" data-target="{confidence}" style="margin: 0; font-size: 48px; font-weight: 800; color: {badge_color}; line-height: 1;">{confidence:.1f}%</h2>
             <span style="color: var(--leaf-muted); font-size: 14px;">Confidence Score</span>
+        </div>
+        <div style="width: 100%; background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 16px;">
+            <div style="width: {confidence}%; height: 100%; background: {badge_color}; border-radius: 4px; transform-origin: left; animation: growBar 1s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;"></div>
         </div>
     </div>
     """)
 
-    st.progress(max(0.0, min(confidence / 100, 1.0)))
-
 
 def top_predictions_card(predictions):
     html_content = '<div class="glass-card" style="padding: 16px; height: 100%; display: flex; flex-direction: column; justify-content: center;">'
-    for disease, score in predictions:
+    for i, (disease, score) in enumerate(predictions):
         score_val = float(score)
         color = get_confidence_color(score_val)
         html_content += f"""
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <span style="color: var(--leaf-text); font-weight: 500;">{disease}</span>
-            <span style="color: {color}; font-family: 'Poppins', sans-serif; font-weight: 600;">{score_val:.1f}%</span>
+        <div class="pop-in-card" style="padding: 12px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); animation-delay: {i * 0.15}s;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="color: var(--leaf-text); font-weight: 500;">{disease}</span>
+                <span class="count-up" data-target="{score_val}" style="color: {color}; font-family: 'Poppins', sans-serif; font-weight: 600;">{score_val:.1f}%</span>
+            </div>
+            <div style="width: 100%; background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; overflow: hidden;">
+                <div style="width: {score_val}%; height: 100%; background: {color}; border-radius: 3px; transform-origin: left; transform: scaleX(0); animation: growBar 1s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; animation-delay: {i * 0.15}s;"></div>
+            </div>
         </div>
         """
     html_content += '</div>'
