@@ -1019,15 +1019,15 @@ def load_css():
 
         /* --- Beautiful Dialog Styling --- */
         div[data-testid="stModal"] {
-            background: rgba(2, 6, 23, 0.2) !important;
-            backdrop-filter: blur(16px) !important;
-            -webkit-backdrop-filter: blur(16px) !important;
+            background: rgba(2, 6, 23, 0.1) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
         }
 
         div[data-testid="stDialog"] {
-            background: rgba(15, 23, 42, 0.95) !important;
-            backdrop-filter: blur(24px) !important;
-            -webkit-backdrop-filter: blur(24px) !important;
+            background: rgba(255, 255, 255, 0.03) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
             border: 1px solid rgba(34, 197, 94, 0.3) !important;
             border-radius: 24px !important;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
@@ -1053,7 +1053,7 @@ def load_css():
         /* --- Modern Dialog Input Fields --- */
         div[data-testid="stDialog"] div[data-testid="stTextInput"] div[data-baseweb="input"],
         div[data-testid="stDialog"] div[data-testid="stSelectbox"] div[data-baseweb="select"] {
-            background-color: rgba(255, 255, 255, 0.04) !important;
+            background-color: rgba(255, 255, 255, 0.02) !important;
             border-radius: 12px !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             transition: all 0.3s ease !important;
@@ -1062,7 +1062,7 @@ def load_css():
         div[data-testid="stDialog"] div[data-testid="stTextInput"] div[data-baseweb="input"]:focus-within,
         div[data-testid="stDialog"] div[data-testid="stSelectbox"] div[data-baseweb="select"]:focus-within {
             border-color: var(--leaf-primary) !important;
-            background-color: rgba(255, 255, 255, 0.08) !important;
+            background-color: rgba(255, 255, 255, 0.05) !important;
             box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25) !important;
         }
 
@@ -1078,6 +1078,76 @@ def load_css():
         div[data-testid="stDialog"] div[data-testid="stTextInput"] input::placeholder {
             color: var(--leaf-muted) !important;
             opacity: 0.8 !important;
+        }
+
+        /* --- Dialog Thinner Scrollbar --- */
+        div[data-testid="stDialog"]::-webkit-scrollbar {
+            width: 4px !important;
+        }
+        div[data-testid="stDialog"]::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+        div[data-testid="stDialog"]::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.15) !important;
+            border-radius: 10px !important;
+            border: none !important;
+        }
+        div[data-testid="stDialog"]::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.3) !important;
+        }
+
+        /* --- Dialog-Specific Custom Tab Toggle (Pill/Segmented Control) --- */
+        div[data-testid="stDialog"] div[data-baseweb="tab-list"] {
+            background: rgba(0, 0, 0, 0.4) !important;
+            border-radius: 99px !important;
+            padding: 6px !important;
+            display: flex !important;
+            gap: 4px !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            margin-bottom: 24px !important;
+        }
+
+        div[data-testid="stDialog"] button[data-baseweb="tab"] {
+            flex: 1 !important;
+            border-radius: 99px !important;
+            padding: 12px 16px !important;
+            font-weight: 700 !important;
+            font-size: 14px !important;
+            justify-content: center !important;
+        }
+
+        /* --- Dialog Tab Switch Animation --- */
+        div[data-testid="stDialog"] div[data-baseweb="tab-panel"] {
+            animation: dialogTabSwitch 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+        }
+
+        @keyframes dialogTabSwitch {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Dialog Buttons Sizing (Smaller & Centered) --- */
+        div[data-testid="stDialog"] div[data-testid="stButton"] {
+            display: flex !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
+
+        div[data-testid="stDialog"] div[data-testid="stButton"] button {
+            min-height: 42px !important;
+            height: 42px !important;
+            padding: 8px 28px !important;
+            font-size: 14.5px !important;
+            border-radius: 12px !important;
+            width: auto !important;
+            min-width: 220px !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        }
+
+        div[data-testid="stDialog"] div[data-testid="stButton"] button[kind="primary"]:hover {
+            transform: translateY(-3px) scale(1.04) !important;
+            box-shadow: 0 12px 28px rgba(34, 197, 94, 0.45) !important;
+            background-position: right center !important;
         }
 
         .chat-shell{
@@ -1921,6 +1991,7 @@ def load_css():
         .custom-toast-container {
             position: fixed;
             bottom: 30px;
+            top: 90px;
             right: 30px;
             z-index: 100000;
             animation: toastSlideIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards, toastFadeOut 0.5s ease forwards 4.5s;
@@ -1946,11 +2017,15 @@ def load_css():
         @keyframes toastSlideIn {
             from { transform: translateX(120%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
+            from { transform: translateY(-150%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         @keyframes toastFadeOut {
             from { opacity: 1; transform: translateX(0); }
             to { opacity: 0; transform: translateX(120%); visibility: hidden; }
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-150%); visibility: hidden; }
         }
 
         /* --- Enterprise SaaS Footer --- */
