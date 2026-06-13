@@ -58,7 +58,7 @@ def render_navbar(current_page: str = "Home"):
 
         <div class="nav-container-inner">
             <div class="nav-brand" aria-label="AgroVision AI">
-                <div class="brand-icon">🌿</div>
+                <div class="brand-icon"><i class="fa-solid fa-leaf"></i></div>
                 <span class="nav-brand-title">AgroVision AI</span>
             </div>
 
@@ -67,6 +67,7 @@ def render_navbar(current_page: str = "Home"):
                     <a href="/" target="_self" class="nav-link{' active' if current_page == 'Home' else ''}">Home</a>
                     <a href="/Dataset" target="_self" class="nav-link{' active' if current_page == 'Dataset' else ''}">Dataset</a>
                     <a href="/History" target="_self" class="nav-link{' active' if current_page == 'History' else ''}">History</a>
+                    <a href="/Profile" target="_self" class="nav-link{' active' if current_page == 'Profile' else ''}">Profile</a>
                     <a href="/About" target="_self" class="nav-link{' active' if current_page == 'About' else ''}">About</a>
                     <a href="/Admin" target="_self" class="nav-link{' active' if current_page == 'Admin' else ''}">Admin</a>
                 </div>
@@ -83,11 +84,12 @@ def render_navbar(current_page: str = "Home"):
 
         <div class="mobile-dropdown" role="dialog" aria-label="Mobile navigation">
             <div class="mobile-nav-links">
-                <a href="/" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Home' else ''}">Home</a>
-                <a href="/Dataset" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Dataset' else ''}">Dataset</a>
-                <a href="/History" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'History' else ''}">History</a>
-                <a href="/About" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'About' else ''}">About</a>
-                <a href="/Admin" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Admin' else ''}">Admin</a>
+                <a href="/" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Home' else ''}"><i class="fa-solid fa-house" style="margin-right: 8px;"></i> Home</a>
+                <a href="/Dataset" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Dataset' else ''}"><i class="fa-solid fa-database" style="margin-right: 8px;"></i> Dataset</a>
+                <a href="/History" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'History' else ''}"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 8px;"></i> History</a>
+                <a href="/Profile" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Profile' else ''}"><i class="fa-solid fa-user" style="margin-right: 8px;"></i> Profile</a>
+                <a href="/About" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'About' else ''}"><i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> About</a>
+                <a href="/Admin" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Admin' else ''}"><i class="fa-solid fa-lock" style="margin-right: 8px;"></i> Admin</a>
                 {mobile_auth_link}
             </div>
         </div>
