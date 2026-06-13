@@ -25,20 +25,90 @@ from frontend.styles import load_css
 
 load_dotenv()
 
-def require_username(force=False):
-    if not st.session_state.get("username"):
-        st.sidebar.html("""
-        <div class="glass-card" style="padding: 16px; margin: 0 0 24px 0; text-align: center; border-top: 3px solid var(--leaf-primary);">
-            <div style="font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">👤</div>
-            <h3 style="margin: 0; font-size: 18px; color: var(--leaf-text); font-family: 'Poppins', sans-serif;">Guest Mode</h3>
-            <p style="margin: 4px 0 0 0; color: var(--leaf-muted); font-size: 12px; font-weight: 600;">Sign in to save your history</p>
+def render_navbar(current_page: str = "Home"):
+    nav_container = st.container()
+    with nav_container:
+        st.markdown('<div class="navbar-container-marker"></div>', unsafe_allow_html=True)
+
+        st.html(f"""
+        <input type="checkbox" id="mobile-menu-toggle" class="mobile-menu-toggle">
+        <div class="nav-background"></div>
+        <div class="nav-processing-line"></div>
+        <div class="nav-orb nav-orb-left"></div>
+        <div class="nav-orb nav-orb-right"></div>
+
+        <div class="nav-container-inner">
+            <div class="nav-brand" aria-label="AgroVision AI">
+                <div class="brand-icon">🌿</div>
+                <span class="nav-brand-title">AgroVision AI</span>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-links" role="navigation" aria-label="Primary">
+                    <a href="/" target="_self" class="nav-link{' active' if current_page == 'Home' else ''}">Home</a>
+                    <a href="/Dataset" target="_self" class="nav-link{' active' if current_page == 'Dataset' else ''}">Dataset</a>
+                    <a href="/History" target="_self" class="nav-link{' active' if current_page == 'History' else ''}">History</a>
+                    <a href="/About" target="_self" class="nav-link{' active' if current_page == 'About' else ''}">About</a>
+                    <a href="/Admin" target="_self" class="nav-link{' active' if current_page == 'Admin' else ''}">Admin</a>
+                </div>
+
+                <div class="nav-cta-slot" aria-hidden="true"></div>
+
+                <label for="mobile-menu-toggle" class="hamburger-btn" aria-label="Open menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="mobile-dropdown" role="dialog" aria-label="Mobile navigation">
+            <div class="mobile-nav-links">
+                <a href="/" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Home' else ''}">Home</a>
+                <a href="/Dataset" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Dataset' else ''}">Dataset</a>
+                <a href="/History" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'History' else ''}">History</a>
+                <a href="/About" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'About' else ''}">About</a>
+                <a href="/Admin" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Admin' else ''}">Admin</a>
+
+            </div>
         </div>
         """)
-        st.sidebar.markdown('<div class="sidebar-login-marker"></div>', unsafe_allow_html=True)
-        if st.sidebar.button("Sign In / Register", key="login_sidebar", use_container_width=True):
-            st.session_state.show_auth = True
-            st.rerun()
 
+
+        # IMPORTANT: keep mobile behavior unchanged.
+        # For desktop, show a toggle-style auth CTA:
+        # - logged out: show "Get Started" that triggers the authentication card
+        # - logged in: show a red-themed "Logout" button
+        is_logged_in = bool(st.session_state.get("username"))
+
+        if not is_logged_in:
+            st.html('<div class="nav-btn-marker logged-out"></div>')
+            # Show a desktop Get Started button. This should NOT affect mobile.
+            # (Mobile CSS can hide/ignore .nav-auth-toggle for hamburger layout.)
+            if st.button(
+                "Get Started",
+                key="get_started_navbar",
+                use_container_width=True,
+            ):
+                st.session_state.show_auth = True
+                st.rerun()
+        else:
+            st.html(f"""
+            <div class="nav-user-info">
+                <div class="nav-bell" title="Notifications">🔔<span class="bell-dot"></span></div>
+                <div class="nav-user" title="Profile">
+                    <span class="nav-avatar">{st.session_state.get("avatar", "🧑‍🌾")}</span>
+                    <span class="nav-username">{st.session_state.get("username", "User")}</span>
+                </div>
+            </div>
+            """)
+            st.html('<div class="nav-btn-marker logged-in"></div>', unsafe_allow_html=True)
+            if st.button("Logout", key="logout_navbar", use_container_width=True):
+                st.session_state.clear()
+                st.rerun()
+
+def require_username(force=False):
+    if not st.session_state.get("username"):
         if not force and not st.session_state.get("show_auth", False):
             return
 
@@ -53,8 +123,9 @@ def require_username(force=False):
             </div>
             """
         )
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
+        auth_container = st.container()
+        with auth_container:
+            st.markdown('<div class="auth-container-marker"></div>', unsafe_allow_html=True)
             tab_login, tab_signup = st.tabs(["Login", "Create Account"])
 
             with tab_login:
@@ -136,24 +207,13 @@ def require_username(force=False):
 
         if not force:
             st.html("<br>")
-            col_b1, col_b2, col_b3 = st.columns([1, 2, 1])
-            with col_b2:
+            back_container = st.container()
+            with back_container:
+                st.markdown('<div class="auth-container-marker"></div>', unsafe_allow_html=True)
                 if st.button("← Back to Home", use_container_width=True):
                     st.session_state.show_auth = False
                     st.rerun()
         st.stop()
-    else:
-        st.sidebar.html(f"""
-        <div class="glass-card" style="padding: 16px; margin: 0 0 24px 0; text-align: center; border-top: 3px solid var(--leaf-primary);">
-            <div style="font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">{st.session_state.get('avatar', '🧑‍🌾')}</div>
-            <h3 style="margin: 0; font-size: 18px; color: var(--leaf-text); font-family: 'Poppins', sans-serif;">{st.session_state.get('username', 'User')}</h3>
-            <p style="margin: 4px 0 0 0; color: var(--leaf-primary); font-size: 12px; font-weight: 600;"><i class="fa-solid fa-circle" style="font-size: 8px; margin-right: 4px;"></i> Online</p>
-        </div>
-        """)
-        st.sidebar.markdown('<div class="sidebar-logout-marker"></div>', unsafe_allow_html=True)
-        if st.sidebar.button("Logout", key="logout_sidebar", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
 
 def load_history():
     user_id = st.session_state.get("user_id")
@@ -840,6 +900,7 @@ def render_footer():
 
 def main(active_tab: str = "all"):
     load_css()
+    render_navbar("Home")
     require_username()
     render_header()
 

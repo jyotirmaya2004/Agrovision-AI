@@ -1,0 +1,20 @@
+/* Mobile-only CSS fixes */
+
+/* Prevent overlap between the hamburger button and "Get Started" CTA on small screens.
+   The CTA is rendered as a Streamlit button (custom marker .nav-btn-marker).
+   On mobile (<768px) the CTA container should be hidden, and the hamburger should
+   keep its own stacking/position without sharing space with the CTA. */
+@media (max-width: 768px) {
+  /* Ensure hamburger always sits above anything else in the navbar */
+  .hamburger-btn {
+    z-index: 1200 !important;
+    position: relative;
+  }
+
+  /* Extra safety: hide any desktop CTA button container on mobile */
+  div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
+  > div[data-testid="stElementContainer"]:has(.nav-btn-marker) {
+    display: none !important;
+  }
+}
+

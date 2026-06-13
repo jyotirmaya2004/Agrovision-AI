@@ -2,6 +2,7 @@ import streamlit as st
 
 from frontend.components import page_header, section_title
 from frontend.styles import load_css
+from frontend.ui import render_navbar
 from frontend.chatbot import chatbot_ui
 
 
@@ -12,6 +13,7 @@ st.set_page_config(
 )
 
 load_css()
+render_navbar("Dataset")
 page_header(
     "Dataset Information",
     "Model training data, supported crops, and disease categories.",

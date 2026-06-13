@@ -96,6 +96,10 @@ def load_css():
             display: none !important;
         }
 
+        header[data-testid="stHeader"] {
+            display: none !important;
+        }
+
         /* --- Global 5-Layer Background CSS --- */
         .global-bg-container {
             position: fixed;
@@ -1439,163 +1443,402 @@ def load_css():
             scrollbar-color: var(--leaf-primary-dark) rgba(255, 255, 255, 0.02);
         }
 
-        /* --- Sidebar --- */
-        section[data-testid="stSidebar"] {
-            background: rgba(15, 23, 42, 0.96) !important;
-            border-right: 1px solid rgba(34, 197, 94, 0.24) !important;
-            box-shadow: 18px 0 46px rgba(0, 0, 0, 0.34) !important;
-        }
-
-        section[data-testid="stSidebar"] > div {
-            background: transparent !important;
-            padding-top: 12px !important;
-        }
-
+        /* --- Global Sidebar Removal --- */
+        section[data-testid="stSidebar"],
         button[data-testid="stSidebarCollapseButton"] {
-            align-items: center !important;
-            background: rgba(255, 255, 255, 0.04) !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            border-radius: 10px !important;
-            display: flex !important;
-            height: 38px !important;
-            justify-content: center !important;
-            width: 38px !important;
-        }
-
-        button[data-testid="stSidebarCollapseButton"]:hover {
-            background: rgba(239, 68, 68, 0.15) !important;
-            border-color: rgba(239, 68, 68, 0.36) !important;
-        }
-
-        button[data-testid="stSidebarCollapseButton"] svg {
             display: none !important;
         }
 
-        button[data-testid="stSidebarCollapseButton"]::before {
-            color: var(--leaf-muted);
-            content: "\\f00d";
-            font-family: "Font Awesome 6 Free";
-            font-size: 17px;
-            font-weight: 900;
+        /* --- PREMIUM RESPONSIVE NAVBAR --- */
+        .navbar-container-marker { display: none; }
+
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker) {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            width: 100%;
+            background: transparent;
+            gap: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
         }
 
-        button[data-testid="stSidebarCollapseButton"]:hover::before {
-            color: #ef4444;
+        :root {
+            --nav-height: 72px;
+            --nav-x-pad: 40px;
+            --nav-gap: 32px;
+            --nav-link-fs: 15px;
         }
 
-        div[data-testid="stSidebarNav"]::before {
-            border-bottom: 1px solid rgba(34, 197, 94, 0.22);
-            color: var(--leaf-primary);
-            content: "\\f4d8  AgroVision AI";
+        .nav-background {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: var(--nav-height);
+            background: rgba(2, 8, 23, 0.72);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1;
+        }
+
+        .nav-processing-line {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, #22C55E, #16A34A, transparent);
+            background-size: 200% auto;
+            animation: navProcessing 3s linear infinite;
+            z-index: 15;
+            box-shadow: 0 -1px 8px rgba(34, 197, 94, 0.8);
+        }
+        @keyframes navProcessing {
+            0% { background-position: -100% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .nav-orb {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .nav-orb-left { background: #22C55E; left: -50px; top: calc(-1 * var(--nav-height)); }
+        .nav-orb-right { background: #3B82F6; right: -50px; top: calc(-1 * var(--nav-height)); }
+
+        .mobile-menu-toggle { display: none; }
+
+        .nav-container-inner {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1440px;
+            margin: 0 auto;
+            height: var(--nav-height);
+            padding: 0 calc(var(--nav-x-pad) + 140px);
+        }
+
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .brand-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22C55E;
+            font-size: 16px;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 18px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: var(--nav-gap);
+            flex: 1;
+            min-width: 0;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.72);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: var(--nav-link-fs);
+            transition: all 0.25s ease;
+            position: relative;
+            padding: 6px 0;
+            background: transparent !important;
+            box-shadow: none !important;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #ffffff;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #22C55E;
+            transition: width 0.25s ease;
+            border-radius: 999px;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .nav-link-cta {
+            margin-top: 4px;
+            color: rgba(255,255,255,0.9) !important;
+        }
+
+        .hamburger-btn {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            z-index: 110;
+            user-select: none;
+        }
+
+        .hamburger-btn span {
             display: block;
-            font-family: "Font Awesome 6 Free";
-            font-size: 21px;
-            font-weight: 900;
-            letter-spacing: 0;
-            margin: 4px 18px 14px;
-            padding: 16px 4px 18px;
-            text-align: center;
+            width: 22px;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 2px;
+            transition: all 0.25s ease;
         }
 
-        div[data-testid="stSidebarNav"] ul {
+        .nav-btn-marker { display: none; }
+
+        /* CTA + user buttons: keep them on the right without hard-coded pixel offsets */
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
+        > div[data-testid="stElementContainer"]:has(.nav-user-info) {
+            position: absolute;
+            top: 14px;
+            right: 20px;
+            z-index: 20;
+            width: max-content;
+        }
+
+        .nav-user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            height: 44px;
+        }
+
+        .nav-bell {
+            color: #CBD5E1;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .nav-bell:hover { color: white; background: rgba(255, 255, 255, 0.08); }
+        .bell-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            height: 40px;
+            padding: 0 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            color: white;
+            font-weight: 600;
+            font-size: 14.5px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            max-width: 240px;
+        }
+
+        .nav-user:hover { background: rgba(255, 255, 255, 0.08); }
+
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
+        > div[data-testid="stElementContainer"]:has(.nav-btn-marker) + div[data-testid="stElementContainer"] {
+            position: absolute;
+            top: 14px;
+            /* keep CTA well separated from nav links */
+            right: 40px;
+            z-index: 20;
+            width: auto;
+            display: flex;
+            align-items: center;
+            height: 44px;
+            gap: 10px;
+        }
+
+
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
+        > div[data-testid="stElementContainer"]:has(.nav-btn-marker) + div[data-testid="stElementContainer"] button {
+            background: linear-gradient(135deg, var(--leaf-primary), var(--leaf-primary-dark)) !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            font-size: 14.5px !important;
+            padding: 0 22px !important;
+            height: 42px !important;
+            min-height: 42px !important;
+            white-space: nowrap;
+            box-shadow: 0 10px 22px rgba(34, 197, 94, 0.22) !important;
+            transition: all 0.25s ease !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 !important;
+        }
+
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
+        > div[data-testid="stElementContainer"]:has(.nav-btn-marker) + div[data-testid="stElementContainer"] button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 16px 32px rgba(34, 197, 94, 0.32) !important;
+        }
+
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
+        > div[data-testid="stElementContainer"]:has(.nav-btn-marker.logged-in) + div[data-testid="stElementContainer"] button {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            box-shadow: none !important;
+            padding: 0 18px !important;
+        }
+
+        /* Mobile dropdown */
+        .mobile-dropdown {
+            position: absolute;
+            top: var(--nav-height);
+            left: 0;
+            right: 0;
+            background: rgba(2, 8, 23, 0.95);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            padding: 4px 12px 12px !important;
+            padding: 0;
+            overflow: hidden;
+            z-index: 9;
+            transform-origin: top;
+            transform: translateY(-6px);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.25s ease, opacity 0.2s ease;
+            max-height: 80vh;
         }
 
-        a[data-testid="stSidebarNavLink"] {
-            align-items: center;
-            background: transparent;
-            border: 1px solid transparent;
-            border-radius: 10px;
-            color: var(--leaf-text) !important;
+        .mobile-nav-links {
             display: flex;
-            font-size: 15px;
+            flex-direction: column;
+            padding: 18px;
+            gap: 10px;
+        }
+
+        .mobile-dropdown .nav-link {
+            font-size: 16px;
             font-weight: 650;
-            gap: 12px;
-            min-height: 46px;
-            padding: 10px 14px !important;
-            text-decoration: none !important;
-            transition: background 0.2s ease, border-color 0.2s ease;
-            white-space: normal;
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: rgba(255,255,255,0.82);
+            display: block;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.2s ease;
         }
 
-        a[data-testid="stSidebarNavLink"]:hover {
-            background: rgba(34, 197, 94, 0.12);
-            border-color: rgba(34, 197, 94, 0.24);
+        .mobile-dropdown .nav-link:hover,
+        .mobile-dropdown .nav-link.active {
+            background: rgba(34, 197, 94, 0.10);
+            border-color: rgba(34, 197, 94, 0.25);
+            color: #22C55E;
         }
 
-        a[data-testid="stSidebarNavLink"][aria-current="page"] {
-            background: rgba(34, 197, 94, 0.18);
-            border-color: rgba(34, 197, 94, 0.38);
-            box-shadow: inset 3px 0 0 var(--leaf-primary);
+        .mobile-dropdown .nav-link::after { display: none; }
+
+        /* Checkbox toggle animations */
+        #mobile-menu-toggle:checked ~ .mobile-dropdown {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
         }
 
-        span[data-testid="stSidebarNavLinkIcon"],
-        a[data-testid="stSidebarNavLink"] svg {
-            display: none !important;
+        #mobile-menu-toggle:checked ~ .nav-container-inner .hamburger-btn span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        #mobile-menu-toggle:checked ~ .nav-container-inner .hamburger-btn span:nth-child(2) { opacity: 0; }
+        #mobile-menu-toggle:checked ~ .nav-container-inner .hamburger-btn span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+        /* Breakpoints (explicit) */
+        @media (min-width: 1440px) {
+            :root { --nav-x-pad: 56px; --nav-gap: 36px; --nav-link-fs: 15.5px; }
         }
 
-        a[data-testid="stSidebarNavLink"]::before {
-            color: var(--leaf-primary);
-            display: inline-block;
-            flex: 0 0 22px;
-            font-family: "Font Awesome 6 Free";
-            font-size: 17px;
-            font-weight: 900;
-            text-align: center;
+        @media (max-width: 1199px) {
+            :root { --nav-x-pad: 28px; --nav-gap: 24px; --nav-link-fs: 14.5px; }
         }
 
-        div[data-testid="stSidebarNav"] ul li:nth-child(1) a::before { content: "\\f015"; }
-        div[data-testid="stSidebarNav"] ul li:nth-child(2) a::before { content: "\\f1da"; }
-        div[data-testid="stSidebarNav"] ul li:nth-child(3) a::before { content: "\\f1c0"; }
-        div[data-testid="stSidebarNav"] ul li:nth-child(4) a::before { content: "\\f05a"; }
-        div[data-testid="stSidebarNav"] ul li:nth-child(5) a::before { content: "\\f3ed"; }
-        div[data-testid="stSidebarNav"] ul li:nth-child(6) a::before { content: "\\f007"; }
-
-        section[data-testid="stSidebar"] .stButton button {
-            align-items: center;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 10px;
-            box-shadow: none;
-            color: var(--leaf-muted);
-            display: flex;
-            font-weight: 650;
-            justify-content: flex-start;
-            margin: 8px 12px 0;
-            min-height: 46px;
-            padding: 10px 14px;
-            width: calc(100% - 24px);
+        @media (max-width: 991px) {
+            :root { --nav-x-pad: 22px; --nav-gap: 18px; --nav-link-fs: 14px; }
         }
 
-        section[data-testid="stSidebar"] .stButton button:hover {
-            background: rgba(239, 68, 68, 0.12);
-            border-color: rgba(239, 68, 68, 0.34);
-            color: #ef4444;
+        @media (max-width: 768px) {
+            :root { --nav-x-pad: 18px; }
+            .nav-links { display: none; }
+            .hamburger-btn { display: flex; }
+            .nav-container-inner { padding: 0 var(--nav-x-pad); }
+
+            /* hide CTA/user area on closed mobile menu; dropdown takes over */
+            div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
+            > div[data-testid="stElementContainer"]:has(.nav-btn-marker),
+            div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
+            > div[data-testid="stElementContainer"]:has(.nav-user-info) {
+                display: none !important;
+            }
         }
 
-
-                /* Hide markers */
-        .sidebar-login-marker, .sidebar-logout-marker { display: none; }
-        div[data-testid="stElementContainer"]:has(.sidebar-login-marker),
-        div[data-testid="stElementContainer"]:has(.sidebar-logout-marker) { display: none !important; }
-
-        div[data-testid="stElementContainer"]:has(.sidebar-login-marker) + div[data-testid="stElementContainer"] button::before {
-            content: "\\f2f6";
-        }
-        div[data-testid="stElementContainer"]:has(.sidebar-logout-marker) + div[data-testid="stElementContainer"] button::before {
-            content: "\\f2f5";
+        @media (max-width: 576px) {
+            :root { --nav-link-fs: 14.5px; }
         }
 
-        section[data-testid="stSidebar"] .stButton button::before {
-            font-family: "Font Awesome 6 Free";
-            font-size: 17px;
-            font-weight: 900;
-            margin-right: 12px;
-            width: 22px;
+        @media (max-width: 375px) {
+            :root { --nav-gap: 14px; --nav-link-fs: 14px; }
         }
+
+        .block-container { padding-top: 110px !important; }
+
 
         /* --- Auto-hiding Success Message --- */
         @keyframes autoFadeOut {
@@ -1903,6 +2146,38 @@ def load_css():
             }
             .f-stat {
                 min-width: 45%;
+            }
+        }
+
+        /* --- Responsive Auth & Centered Containers --- */
+        .auth-container-marker { display: none; }
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .auth-container-marker) {
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* --- Global Mobile App View Padding & Tabs --- */
+        @media (max-width: 768px) {
+            .block-container,
+            [data-testid="stAppViewBlockContainer"] {
+                padding-top: 90px !important;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+            }
+
+            button[data-baseweb="tab"] {
+                padding: 10px 12px !important;
+                font-size: 13.5px !important;
+                flex: 1;
+                text-align: center;
+                justify-content: center;
+            }
+            div[data-baseweb="tab-list"] {
+                display: flex;
+                width: 100%;
+                overflow-x: auto;
+                flex-wrap: nowrap;
             }
         }
 

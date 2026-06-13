@@ -3,7 +3,7 @@ import streamlit as st
 
 from frontend.components import page_header, section_title, empty_placeholder
 from frontend.styles import load_css
-from frontend.ui import load_history, clear_history, _generate_history_pdf, require_username
+from frontend.ui import load_history, clear_history, _generate_history_pdf, require_username, render_navbar
 from frontend.chatbot import chatbot_ui
 
 
@@ -14,6 +14,7 @@ st.set_page_config(
 )
 
 load_css()
+render_navbar("History")
 require_username(force=True)
 page_header(
     "Prediction History",

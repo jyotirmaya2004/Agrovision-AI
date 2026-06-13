@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from frontend.components import page_header
 from frontend.styles import load_css
+from frontend.ui import render_navbar
 from frontend.chatbot import chatbot_ui
 
 st.set_page_config(
@@ -14,6 +15,7 @@ st.set_page_config(
 )
 
 load_css()
+render_navbar("Admin")
 page_header(
     "Admin - Database Viewer",
     "View the Supabase database records directly from the deployed app.",
@@ -35,8 +37,9 @@ if not st.session_state.get("admin_authenticated", False):
         </div>
         """
     )
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
+    auth_container = st.container()
+    with auth_container:
+        st.markdown('<div class="auth-container-marker"></div>', unsafe_allow_html=True)
         st.html('<h4 style="margin-top: 0; margin-bottom: 16px; color: var(--leaf-text); font-family: \'Poppins\', sans-serif;"><i class="fa-solid fa-key" style="color: #ef4444; margin-right: 8px;"></i> Admin Authentication</h4>')
         pwd = st.text_input("Admin Password", type="password", placeholder="Enter admin password", label_visibility="collapsed", key="admin_pass")
 
