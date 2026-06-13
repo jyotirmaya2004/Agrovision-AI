@@ -91,8 +91,11 @@ def load_css():
             display: none !important;
         }
 
-        /* --- Streamlit Chrome --- */
-        #MainMenu, footer {
+        /* --- Streamlit Chrome & Deployment Badges --- */
+        #MainMenu, footer,
+        [data-testid="stToolbar"],
+        [data-testid="stDeployButton"],
+        [class*="viewerBadge"] {
             display: none !important;
         }
 
