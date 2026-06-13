@@ -10,6 +10,7 @@ st.set_page_config(
     page_title="About Project",
     page_icon=":information_source:",
     layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 load_css()

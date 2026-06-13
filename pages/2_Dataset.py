@@ -10,6 +10,7 @@ st.set_page_config(
     page_title="Dataset Information",
     page_icon=":books:",
     layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 load_css()

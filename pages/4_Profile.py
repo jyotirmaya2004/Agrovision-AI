@@ -9,6 +9,7 @@ st.set_page_config(
     page_title="Profile",
     page_icon=":user:",
     layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 load_css()

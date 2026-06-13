@@ -8,7 +8,7 @@ st.set_page_config(
     page_title="Plantexa AI",
     page_icon=":seedling:",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 

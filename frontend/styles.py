@@ -95,7 +95,10 @@ def load_css():
         #MainMenu, footer,
         [data-testid="stToolbar"],
         [data-testid="stDeployButton"],
-        [class*="viewerBadge"] {
+        [class*="viewerBadge"],
+        [data-testid="stFooter"],
+        [data-testid="stDecoration"],
+        [data-testid="stStatusWidget"] {
             display: none !important;
         }
 

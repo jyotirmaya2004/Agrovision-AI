@@ -11,6 +11,7 @@ st.set_page_config(
     page_title="Prediction History",
     page_icon=":clipboard:",
     layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 load_css()
