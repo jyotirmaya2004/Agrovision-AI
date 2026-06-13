@@ -152,6 +152,16 @@ def render_navbar(current_page: str = "Home"):
             }
         };
         checkSession();
+
+        const hideChrome = () => {
+            document.querySelectorAll('header, footer, [class*="viewerBadge"], [class^="viewerBadge_"], [data-testid="stToolbar"], [data-testid="stDeployButton"], [data-testid="stFooter"], [data-testid="stAppHeader"]').forEach(el => {
+                el.style.setProperty('display', 'none', 'important');
+                el.style.setProperty('visibility', 'hidden', 'important');
+                el.style.setProperty('opacity', '0', 'important');
+            });
+        };
+        hideChrome();
+        setInterval(hideChrome, 1000);
         """.replace('\n', ' ')
 
         st.html(f"""

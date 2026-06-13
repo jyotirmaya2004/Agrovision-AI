@@ -92,18 +92,21 @@ def load_css():
         }
 
         /* --- Streamlit Chrome & Deployment Badges --- */
-        #MainMenu, footer,
+        #MainMenu,
+        footer,
+        header,
         [data-testid="stToolbar"],
         [data-testid="stDeployButton"],
-        [class*="viewerBadge"],
         [data-testid="stFooter"],
         [data-testid="stDecoration"],
-        [data-testid="stStatusWidget"] {
+        [data-testid="stStatusWidget"],
+        [data-testid="stHeader"],
+        [data-testid="stAppHeader"],
+        [class^="viewerBadge_"],
+        [class*="viewerBadge"] {
             display: none !important;
-        }
-
-        header[data-testid="stHeader"] {
-            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
         }
 
         /* --- Global 5-Layer Background CSS --- */
