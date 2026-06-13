@@ -19,6 +19,7 @@ if str(ROOT_DIR) not in sys.path:
 
 importlib.invalidate_caches()
 main = importlib.import_module("frontend.ui").main
+from frontend.ui import main
 
 active_tab = st.query_params.get("tab", "all")
 main(active_tab=active_tab)
