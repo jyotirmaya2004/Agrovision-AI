@@ -25,8 +25,39 @@ from frontend.styles import load_css
 
 load_dotenv()
 
+def _handle_auth_query_params():
+    """Safely handle explicit auth actions from query params.
+
+    Important: this must only run after we have attempted to restore a session.
+    We also ensure we never clear session unless the user is already logged in.
+    """
+    action = st.query_params.get("action")
+    if action == "login":
+        st.session_state.show_auth = True
+        if "action" in st.query_params:
+            del st.query_params["action"]
+        st.rerun()
+
+    if action == "logout":
+        # Only clear when the user is currently logged in; otherwise ignore.
+        if st.session_state.get("username"):
+            st.session_state.clear()
+            st.session_state.clear_cookie = True
+        if "action" in st.query_params:
+            del st.query_params["action"]
+        st.rerun()
+
+
 def render_navbar(current_page: str = "Home"):
+    # Ensure auth/session is restored as early as possible on every rerun
+    restore_session_if_needed()
+
+    # Handle explicit login/logout actions from query params
+    _handle_auth_query_params()
+
     # 0. Global Toast Notification for New Accounts
+
+
     if st.session_state.get("new_account"):
         username = st.session_state.get("username", "User")
         st.html(f"""
@@ -92,17 +123,26 @@ def render_navbar(current_page: str = "Home"):
 
     # Handle mobile menu auth actions via query params
     action = st.query_params.get("action")
+
+    # Guard: prevent accidental logout during navigation.
+    # Only process explicit logout when user is currently logged in.
     if action == "login":
         st.session_state.show_auth = True
         if "action" in st.query_params:
             del st.query_params["action"]
         st.rerun()
     elif action == "logout":
-        st.session_state.clear()
-        st.session_state.clear_cookie = True
-        if "action" in st.query_params:
-            del st.query_params["action"]
-        st.rerun()
+        if st.session_state.get("username"):
+            st.session_state.clear()
+            st.session_state.clear_cookie = True
+            if "action" in st.query_params:
+                del st.query_params["action"]
+            st.rerun()
+        else:
+            # If not logged in, ignore stray logout param.
+            if "action" in st.query_params:
+                del st.query_params["action"]
+
 
     is_logged_in = bool(st.session_state.get("username"))
     if not is_logged_in:
@@ -388,7 +428,73 @@ def render_auth_dialog():
             except Exception as e:
                 st.error(f"Registration failed: {e}")
 
+def restore_session_if_needed():
+    """Restore username/user_id/avatar into st.session_state using browser cookie/localStorage.
+
+    This must run before require_username checks so login doesn't appear to reset on navigation.
+    """
+    if st.session_state.get("username"):
+        return
+
+    if st.session_state.get("_restored_session_once"):
+        return
+
+    if st.session_state.get("clear_cookie"):
+        return
+
+    # Attempt 1: server-side native cookie (if available)
+    if hasattr(st, "context") and hasattr(st.context, "cookies"):
+        saved_username = st.context.cookies.get("plantexa_user")
+        if saved_username:
+            try:
+                from supabase import create_client
+                supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
+                supabase_key = os.getenv("SUPABASE_KEY")
+                if supabase_key:
+                    supabase = create_client(supabase_url, supabase_key)
+                    response = (
+                        supabase.table("app_users")
+                        .select("id, avatar")
+                        .eq("username", saved_username)
+                        .limit(1)
+                        .execute()
+                    )
+                    if response.data:
+                        st.session_state.username = saved_username
+                        st.session_state.user_id = response.data[0].get("id")
+                        st.session_state.avatar = response.data[0].get("avatar") or "🧑‍🌾"
+                        st.session_state.last_activity = time.time()
+                        st.session_state._restored_session_once = True
+                        return
+            except Exception:
+                pass
+
+    # Attempt 2: localStorage is synced to query params by injected JS in render_navbar,
+    # so we only need to handle the query-param restore here.
+    restore_user = st.query_params.get("session_restore_user")
+    if restore_user and not st.session_state.get("username"):
+        st.session_state.username = restore_user
+        st.session_state.user_id = st.query_params.get("session_restore_id")
+        st.session_state.avatar = st.query_params.get("session_restore_avatar", "🧑‍🌾")
+        st.session_state.last_activity = time.time()
+
+        if "session_restore_user" in st.query_params:
+            del st.query_params["session_restore_user"]
+        if "session_restore_id" in st.query_params:
+            del st.query_params["session_restore_id"]
+        if "session_restore_avatar" in st.query_params:
+            del st.query_params["session_restore_avatar"]
+
+        st.session_state._restored_session_once = True
+        return
+
+    st.session_state._restored_session_once = True
+
+
 def require_username(force=False):
+    # Always restore session first so auth does not reset on page navigation.
+    restore_session_if_needed()
+
     # 1. Check for inactivity timeout (1800 seconds = 30 minutes)
     if st.session_state.get("username"):
         last_active = st.session_state.get("last_activity", time.time())
@@ -422,6 +528,7 @@ def require_username(force=False):
             st.stop()
         else:
             st.session_state.show_auth = False
+
 
 def load_history():
     user_id = st.session_state.get("user_id")
