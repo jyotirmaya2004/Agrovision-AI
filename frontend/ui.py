@@ -26,6 +26,24 @@ from frontend.styles import load_css
 load_dotenv()
 
 def render_navbar(current_page: str = "Home"):
+    # 0. Global Toast Notification for New Accounts
+    if st.session_state.get("new_account"):
+        username = st.session_state.get("username", "User")
+        st.html(f"""
+        <div class="custom-toast-container">
+            <div class="custom-toast">
+                <div style="font-size: 24px; color: var(--leaf-primary); display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: rgba(34, 197, 94, 0.1); border-radius: 50%;">
+                    <i class="fa-solid fa-seedling"></i>
+                </div>
+                <div>
+                    <h4 style="margin: 0 0 4px 0; font-size: 16px; color: var(--leaf-text); font-family: 'Poppins', sans-serif;">Account Created!</h4>
+                    <p style="margin: 0; color: var(--leaf-muted); font-size: 14px;">Welcome to Plantexa AI, <strong>{username}</strong>.</p>
+                </div>
+            </div>
+        </div>
+        """)
+        st.session_state.new_account = False
+
     # Auto-login via session_restore query param
     restore_user = st.query_params.get("session_restore_user")
     if restore_user and not st.session_state.get("username"):
@@ -244,6 +262,132 @@ def render_navbar(current_page: str = "Home"):
         st.page_link("pages/3_About.py", label="About")
         st.page_link("pages/3_Admin.py", label="Admin")
 
+@st.dialog("Plantexa AI Secure Login")
+def render_auth_dialog():
+    if st.session_state.get("logout_reason"):
+        st.warning(st.session_state.logout_reason)
+        st.session_state.logout_reason = ""
+
+    tab_login, tab_signup = st.tabs(["Login", "Create Account"])
+
+    with tab_login:
+        st.html('<h4 style="margin-top: 0; margin-bottom: 16px; color: var(--leaf-text); font-family: \'Poppins\', sans-serif;"><i class="fa-solid fa-right-to-bracket" style="color: var(--leaf-primary); margin-right: 8px;"></i> Welcome Back</h4>')
+        st.html('<div style="color: var(--leaf-muted); font-size: 14px; font-weight: 600; margin-bottom: 6px;"><i class="fa-solid fa-user" style="color: var(--leaf-primary); margin-right: 8px;"></i>Username</div>')
+        username = st.text_input("Username", placeholder="e.g. JohnDoe", label_visibility="collapsed", key="log_user")
+        st.html('<div style="color: var(--leaf-muted); font-size: 14px; font-weight: 600; margin-bottom: 6px; margin-top: 16px;"><i class="fa-solid fa-lock" style="color: var(--leaf-primary); margin-right: 8px;"></i>Password</div>')
+        password = st.text_input("Password", placeholder="Enter your secret password", type="password", label_visibility="collapsed", key="log_pass")
+        st.html('<br>')
+        st.markdown('<div class="login-btn-marker"></div>', unsafe_allow_html=True)
+        if st.button("Login", type="primary", use_container_width=True):
+            if username.strip() and password.strip():
+                try:
+                    from supabase import create_client
+                    supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
+                    supabase_key = os.getenv("SUPABASE_KEY")
+                    if supabase_key:
+                        supabase = create_client(supabase_url, supabase_key)
+                        hashed_pw = hashlib.sha256(password.strip().encode('utf-8')).hexdigest()
+                        response = supabase.table("app_users").select("id, password, avatar").eq("username", username.strip()).limit(1).execute()
+                        if response.data:
+                            if response.data[0].get("password") == hashed_pw:
+                                st.session_state.username = username.strip()
+                                st.session_state.user_id = response.data[0].get("id")
+                                st.session_state.avatar = response.data[0].get("avatar") or "🧑‍🌾"
+                                st.session_state.set_cookie = username.strip()
+                                st.session_state.sync_session = True
+                                st.session_state.last_activity = time.time()
+                                st.session_state.show_auth = False
+                                st.rerun()
+                            else:
+                                st.error("Incorrect password.")
+                        else:
+                            st.error("Username not found. Please create an account.")
+                except Exception as e:
+                    st.error(f"Login failed: {e}")
+            else:
+                st.error("Please enter both username and password.")
+
+    with tab_signup:
+        st.html('<h4 style="margin-top: 0; margin-bottom: 16px; color: var(--leaf-text); font-family: \'Poppins\', sans-serif;"><i class="fa-solid fa-user-plus" style="color: var(--leaf-primary); margin-right: 8px;"></i> New Account</h4>')
+        st.html('<div style="color: var(--leaf-muted); font-size: 14px; font-weight: 600; margin-bottom: 6px;"><i class="fa-solid fa-face-smile" style="color: var(--leaf-primary); margin-right: 8px;"></i>Choose Avatar</div>')
+        selected_avatar = st.selectbox("Avatar", ["🧑‍🌾 Farmer", "👩‍🌾 Gardener", "👨‍🌾 Agronomist", "🪴 Plant Lover", "🌻 Sunflower", "🌵 Cactus", "🌾 Botanist", "🤖 AI Bot"], key="reg_avatar", label_visibility="collapsed")
+        avatar_emoji = selected_avatar.split(" ")[0]
+
+        st.html('<div style="color: var(--leaf-muted); font-size: 14px; font-weight: 600; margin-bottom: 6px; margin-top: 16px;"><i class="fa-solid fa-user-tag" style="color: var(--leaf-primary); margin-right: 8px;"></i>Choose a Username</div>')
+        new_username = st.text_input("Choose a Username", placeholder="e.g. JaneFarmer", label_visibility="collapsed", key="reg_user")
+        st.html('<div style="color: var(--leaf-muted); font-size: 14px; font-weight: 600; margin-bottom: 6px; margin-top: 16px;"><i class="fa-solid fa-shield-halved" style="color: var(--leaf-primary); margin-right: 8px;"></i>Choose a Password</div>')
+        new_password = st.text_input("Choose a Password", placeholder="Create a strong password", type="password", label_visibility="collapsed", key="reg_pass")
+
+        strength_score = 0
+        if new_password:
+            if len(new_password) >= 8: strength_score += 1
+            if re.search(r"[a-z]", new_password): strength_score += 1
+            if re.search(r"[A-Z]", new_password): strength_score += 1
+            if re.search(r"[0-9]", new_password): strength_score += 1
+            if re.search(r"[^a-zA-Z0-9]", new_password): strength_score += 1
+
+        strength_colors = ["#475569", "#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"]
+        strength_labels = ["", "Very Weak", "Weak", "Fair", "Good", "Strong"]
+        pct = (strength_score / 5) * 100 if new_password else 0
+        color = strength_colors[strength_score] if new_password else strength_colors[0]
+        label = strength_labels[strength_score] if new_password else "Waiting for input..."
+
+        st.html(f"""
+        <div style="margin-top: 10px; margin-bottom: 4px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--leaf-muted); margin-bottom: 6px;">
+                <span>Password Strength</span>
+                <span style="color: {color}; font-weight: 600;">{label}</span>
+            </div>
+            <div style="height: 6px; width: 100%; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="height: 100%; width: {pct}%; background: {color}; transition: width 0.3s ease, background-color 0.3s ease; border-radius: 3px;"></div>
+            </div>
+        </div>
+        """)
+
+        st.html('<div style="color: var(--leaf-muted); font-size: 14px; font-weight: 600; margin-bottom: 6px; margin-top: 16px;"><i class="fa-solid fa-key" style="color: var(--leaf-primary); margin-right: 8px;"></i>Confirm Password</div>')
+        confirm_password = st.text_input("Confirm Password", placeholder="Re-enter to verify", type="password", label_visibility="collapsed", key="reg_confirm")
+        st.html('<br>')
+
+        passwords_match = False
+        if new_password or confirm_password:
+            if new_password == confirm_password:
+                st.html('<div style="color: #22c55e; font-size: 14px; margin-bottom: 12px; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Passwords match</div>')
+                passwords_match = True
+            else:
+                st.html('<div style="color: #ef4444; font-size: 14px; margin-bottom: 12px; font-weight: 600;"><i class="fa-solid fa-circle-xmark"></i> Passwords do not match</div>')
+
+        btn_disabled = not (new_username.strip() and new_password.strip() and passwords_match)
+
+        st.markdown('<div class="signup-btn-marker"></div>', unsafe_allow_html=True)
+        if st.button("Create Account", type="primary", use_container_width=True, disabled=btn_disabled):
+            try:
+                from supabase import create_client
+                supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
+                supabase_key = os.getenv("SUPABASE_KEY")
+                if supabase_key:
+                    supabase = create_client(supabase_url, supabase_key)
+                    check = supabase.table("app_users").select("id").eq("username", new_username.strip()).execute()
+                    if check.data:
+                        st.error("Username already exists. Please log in or choose another.")
+                    else:
+                        hashed_pw = hashlib.sha256(new_password.strip().encode('utf-8')).hexdigest()
+                        new_user = {"username": new_username.strip(), "password": hashed_pw, "avatar": avatar_emoji}
+                        insert_res = supabase.table("app_users").insert(new_user).execute()
+                        if insert_res.data:
+                            st.session_state.username = new_username.strip()
+                            st.session_state.user_id = insert_res.data[0].get("id")
+                            st.session_state.avatar = avatar_emoji
+                            st.session_state.set_cookie = new_username.strip()
+                            st.session_state.sync_session = True
+                            st.session_state.last_activity = time.time()
+                            st.session_state.show_auth = False
+                            st.session_state.new_account = True
+                            st.rerun()
+                        else:
+                            st.error("Failed to create new user account.")
+            except Exception as e:
+                st.error(f"Registration failed: {e}")
+
 def require_username(force=False):
     # 1. Check for inactivity timeout (1800 seconds = 30 minutes)
     if st.session_state.get("username"):
@@ -261,119 +405,23 @@ def require_username(force=False):
         if not force and not st.session_state.get("show_auth", False):
             return
 
-        if st.session_state.get("logout_reason"):
-            st.warning(st.session_state.logout_reason)
-            st.session_state.logout_reason = "" # Clear after displaying
+        render_auth_dialog()
 
-        st.html(
-            """
-            <div class="glass-card" style="padding: 40px 24px; text-align: center; margin-bottom: 32px; margin-top: 16px; border-top: 3px solid var(--leaf-primary);">
-                <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(34, 197, 94, 0.1); color: var(--leaf-primary); font-size: 28px; margin-bottom: 16px;">
-                    <i class="fa-solid fa-shield-halved"></i>
+        if force:
+            st.html(
+                """
+                <div class="glass-card" style="padding: 40px 24px; text-align: center; margin-top: 16px; border-top: 3px solid var(--leaf-primary);">
+                    <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(34, 197, 94, 0.1); color: var(--leaf-primary); font-size: 28px; margin-bottom: 16px;">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h1 style="margin: 0 0 12px 0; font-family: 'Poppins', sans-serif; font-size: 32px !important; color: var(--leaf-text);">Authentication Required</h1>
+                    <p style="margin: 0; color: var(--leaf-muted); font-size: 18px; max-width: 600px; margin-left: auto; margin-right: auto;">You must be logged in to access this page. Please use the popup to authenticate.</p>
                 </div>
-                <h1 style="margin: 0 0 12px 0; font-family: 'Poppins', sans-serif; font-size: 32px !important; color: var(--leaf-text);">Authentication Required</h1>
-                <p style="margin: 0; color: var(--leaf-muted); font-size: 18px; max-width: 600px; margin-left: auto; margin-right: auto;">Please log in or create an account to securely access Plantexa AI and save your history.</p>
-            </div>
-            """
-        )
-        auth_container = st.container()
-        with auth_container:
-            st.markdown('<div class="auth-container-marker"></div>', unsafe_allow_html=True)
-            tab_login, tab_signup = st.tabs(["Login", "Create Account"])
-
-            with tab_login:
-                st.html('<h4 style="margin-top: 0; margin-bottom: 16px; color: var(--leaf-text); font-family: \'Poppins\', sans-serif;"><i class="fa-solid fa-right-to-bracket" style="color: var(--leaf-primary); margin-right: 8px;"></i> Welcome Back</h4>')
-                username = st.text_input("Username", placeholder="Enter your username", label_visibility="collapsed", key="log_user")
-                password = st.text_input("Password", placeholder="Enter your password", type="password", label_visibility="collapsed", key="log_pass")
-                st.markdown('<div class="login-btn-marker"></div>', unsafe_allow_html=True)
-                if st.button("Login", type="primary", use_container_width=True):
-                    if username.strip() and password.strip():
-                        try:
-                            from supabase import create_client
-                            supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
-                            supabase_key = os.getenv("SUPABASE_KEY")
-                            if supabase_key:
-                                supabase = create_client(supabase_url, supabase_key)
-                                hashed_pw = hashlib.sha256(password.strip().encode('utf-8')).hexdigest()
-                                response = supabase.table("app_users").select("id, password, avatar").eq("username", username.strip()).limit(1).execute()
-                                if response.data:
-                                    if response.data[0].get("password") == hashed_pw:
-                                        st.session_state.username = username.strip()
-                                        st.session_state.user_id = response.data[0].get("id")
-                                        st.session_state.avatar = response.data[0].get("avatar") or "🧑‍🌾"
-                                        st.session_state.set_cookie = username.strip()
-                                        st.session_state.sync_session = True
-                                        st.session_state.last_activity = time.time()
-                                        st.session_state.show_auth = False
-                                        st.rerun()
-                                    else:
-                                        st.error("Incorrect password.")
-                                else:
-                                    st.error("Username not found. Please create an account.")
-                        except Exception as e:
-                            st.error(f"Login failed: {e}")
-                    else:
-                        st.error("Please enter both username and password.")
-
-            with tab_signup:
-                st.html('<h4 style="margin-top: 0; margin-bottom: 16px; color: var(--leaf-text); font-family: \'Poppins\', sans-serif;"><i class="fa-solid fa-user-plus" style="color: var(--leaf-primary); margin-right: 8px;"></i> New Account</h4>')
-                st.markdown("<p style='margin-bottom: 4px; margin-top: 8px; color: var(--leaf-muted); font-size: 14px;'>Choose Avatar</p>", unsafe_allow_html=True)
-                selected_avatar = st.selectbox("Avatar", ["🧑‍🌾 Farmer", "👩‍🌾 Gardener", "👨‍🌾 Agronomist", "🪴 Plant Lover", "🌻 Sunflower", "🌵 Cactus", "🌾 Botanist", "🤖 AI Bot"], key="reg_avatar", label_visibility="collapsed")
-                avatar_emoji = selected_avatar.split(" ")[0]
-
-                new_username = st.text_input("Choose a Username", placeholder="e.g. JohnFarmer", label_visibility="collapsed", key="reg_user")
-                new_password = st.text_input("Choose a Password", placeholder="Enter a secure password", type="password", label_visibility="collapsed", key="reg_pass")
-                confirm_password = st.text_input("Confirm Password", placeholder="Re-enter your password", type="password", label_visibility="collapsed", key="reg_confirm")
-
-                passwords_match = False
-                if new_password or confirm_password:
-                    if new_password == confirm_password:
-                        st.html('<div style="color: #22c55e; font-size: 14px; margin-bottom: 12px; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Passwords match</div>')
-                        passwords_match = True
-                    else:
-                        st.html('<div style="color: #ef4444; font-size: 14px; margin-bottom: 12px; font-weight: 600;"><i class="fa-solid fa-circle-xmark"></i> Passwords do not match</div>')
-
-                btn_disabled = not (new_username.strip() and new_password.strip() and passwords_match)
-
-                st.markdown('<div class="signup-btn-marker"></div>', unsafe_allow_html=True)
-                if st.button("Create Account", type="primary", use_container_width=True, disabled=btn_disabled):
-                    try:
-                        from supabase import create_client
-                        supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
-                        supabase_key = os.getenv("SUPABASE_KEY")
-                        if supabase_key:
-                            supabase = create_client(supabase_url, supabase_key)
-                            check = supabase.table("app_users").select("id").eq("username", new_username.strip()).execute()
-                            if check.data:
-                                st.error("Username already exists. Please log in or choose another.")
-                            else:
-                                hashed_pw = hashlib.sha256(new_password.strip().encode('utf-8')).hexdigest()
-                                new_user = {"username": new_username.strip(), "password": hashed_pw, "avatar": avatar_emoji}
-                                insert_res = supabase.table("app_users").insert(new_user).execute()
-                                if insert_res.data:
-                                    st.session_state.username = new_username.strip()
-                                    st.session_state.user_id = insert_res.data[0].get("id")
-                                    st.session_state.avatar = avatar_emoji
-                                    st.session_state.set_cookie = new_username.strip()
-                                    st.session_state.sync_session = True
-                                    st.session_state.last_activity = time.time()
-                                    st.session_state.show_auth = False
-                                    st.session_state.new_account = True
-                                    st.rerun()
-                                else:
-                                    st.error("Failed to create new user account.")
-                    except Exception as e:
-                        st.error(f"Registration failed: {e}")
-
-        if not force:
-            st.html("<br>")
-            back_container = st.container()
-            with back_container:
-                st.markdown('<div class="auth-container-marker"></div>', unsafe_allow_html=True)
-                if st.button("← Back to Home", use_container_width=True):
-                    st.session_state.show_auth = False
-                    st.rerun()
-        st.stop()
+                """
+            )
+            st.stop()
+        else:
+            st.session_state.show_auth = False
 
 def load_history():
     user_id = st.session_state.get("user_id")

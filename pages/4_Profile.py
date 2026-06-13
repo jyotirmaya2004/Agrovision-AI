@@ -18,21 +18,6 @@ require_username(force=True)
 
 username = st.session_state.get("username", "Unknown User")
 
-# Display the custom welcome message exactly once after sign up
-if st.session_state.get("new_account"):
-    st.html(f"""
-    <div class="glass-card" style="padding: 24px; border-left: 4px solid var(--leaf-primary); margin-bottom: 24px; display: flex; align-items: center; gap: 16px;">
-        <div style="font-size: 28px; color: var(--leaf-primary); display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: rgba(34, 197, 94, 0.1); border-radius: 50%;">
-            <i class="fa-solid fa-seedling"></i>
-        </div>
-        <div>
-            <h3 style="margin: 0; font-size: 20px; color: var(--leaf-text); font-family: 'Poppins', sans-serif;">Account Created Successfully!</h3>
-            <p style="margin: 4px 0 0 0; color: var(--leaf-muted); font-size: 15px;">Welcome to Plantexa AI, <strong>{username}</strong>. Your profile is all set up and ready to go.</p>
-        </div>
-    </div>
-    """)
-    st.session_state.new_account = False
-
 page_header(
     "User Profile",
     "View and manage your account details.",

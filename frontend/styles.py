@@ -1017,6 +1017,69 @@ def load_css():
             -webkit-backdrop-filter: blur(12px);
         }
 
+        /* --- Beautiful Dialog Styling --- */
+        div[data-testid="stModal"] {
+            background: rgba(2, 6, 23, 0.2) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+        }
+
+        div[data-testid="stDialog"] {
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            border: 1px solid rgba(34, 197, 94, 0.3) !important;
+            border-radius: 24px !important;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            animation: dialogPop 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+            transform-origin: center center;
+        }
+        @keyframes dialogPop {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        button[aria-label="Close"] {
+            color: var(--leaf-muted) !important;
+            transition: all 0.2s ease !important;
+        }
+        button[aria-label="Close"]:hover {
+            color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.1) !important;
+        }
+
+        /* --- Modern Dialog Input Fields --- */
+        div[data-testid="stDialog"] div[data-testid="stTextInput"] div[data-baseweb="input"],
+        div[data-testid="stDialog"] div[data-testid="stSelectbox"] div[data-baseweb="select"] {
+            background-color: rgba(255, 255, 255, 0.04) !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        div[data-testid="stDialog"] div[data-testid="stTextInput"] div[data-baseweb="input"]:focus-within,
+        div[data-testid="stDialog"] div[data-testid="stSelectbox"] div[data-baseweb="select"]:focus-within {
+            border-color: var(--leaf-primary) !important;
+            background-color: rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25) !important;
+        }
+
+        div[data-testid="stDialog"] div[data-testid="stTextInput"] input {
+            color: var(--leaf-text) !important;
+            font-size: 15px !important;
+            background-color: transparent !important;
+            padding-top: 12px !important;
+            padding-bottom: 12px !important;
+            caret-color: var(--leaf-primary) !important;
+        }
+
+        div[data-testid="stDialog"] div[data-testid="stTextInput"] input::placeholder {
+            color: var(--leaf-muted) !important;
+            opacity: 0.8 !important;
+        }
+
         .chat-shell{
             width: 100%;
             background:rgba(8,28,21,0.85);
@@ -1033,7 +1096,7 @@ def load_css():
         div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .chat-fab-marker) {
             position: fixed;
             right: 18px;
-            bottom: 18px;
+            bottom: 80px;
             z-index: 9999;
             width: 56px;
             height: 56px;
@@ -1058,11 +1121,19 @@ def load_css():
             justify-content: center !important;
             padding: 0 !important;
             position: relative !important;
+            animation: chatFabPulse 2.5s infinite !important;
+        }
+
+        @keyframes chatFabPulse {
+            0% { box-shadow: var(--leaf-shadow), 0 0 0 0 rgba(82, 183, 136, 0.6) !important; }
+            70% { box-shadow: var(--leaf-shadow), 0 0 0 20px rgba(82, 183, 136, 0) !important; }
+            100% { box-shadow: var(--leaf-shadow), 0 0 0 0 rgba(82, 183, 136, 0) !important; }
         }
 
         div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .chat-fab-marker) button:hover {
             transform: translateY(-2px) !important;
             box-shadow: 0 10px 24px rgba(82,183,136,0.4) !important;
+            animation-play-state: paused !important;
         }
 
         div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .chat-fab-marker) button p {
@@ -1084,7 +1155,7 @@ def load_css():
         div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .chat-floating-panel-marker) {
             position: fixed;
             right: 18px;
-            bottom: 86px;
+            bottom: 150px;
             width: min(420px, calc(100vw - 36px));
             max-height: 80vh;
             overflow-y: auto;
@@ -1844,6 +1915,42 @@ def load_css():
             font-weight: 600;
             animation: autoFadeOut 3.2s forwards;
             pointer-events: none;
+        }
+
+        /* --- Custom Toast Notification --- */
+        .custom-toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100000;
+            animation: toastSlideIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards, toastFadeOut 0.5s ease forwards 4.5s;
+            pointer-events: none;
+        }
+
+        .custom-toast {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-left: 4px solid var(--leaf-primary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(34, 197, 94, 0.1);
+        }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes toastFadeOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(120%); visibility: hidden; }
         }
 
         /* --- Enterprise SaaS Footer --- */
