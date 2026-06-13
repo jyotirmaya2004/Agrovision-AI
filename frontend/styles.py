@@ -1480,15 +1480,6 @@ def load_css():
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             z-index: 1;
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-
-        .nav-background.nav-scrolled {
-            background: rgba(2, 8, 23, 0.15);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-bottom-color: transparent;
-            height: 60px;
         }
 
         .nav-processing-line {
@@ -1533,11 +1524,6 @@ def load_css():
             height: var(--nav-height);
             padding-left: var(--nav-x-pad);
             padding-right: calc(var(--nav-x-pad) + 140px);
-            transition: height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-
-        .nav-container-inner.nav-scrolled {
-            height: 60px;
         }
 
 
@@ -1651,60 +1637,6 @@ def load_css():
 
         .nav-btn-marker { display: none; }
 
-        /* CTA + user buttons: keep them on the right without hard-coded pixel offsets */
-        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
-        > div[data-testid="stElementContainer"]:has(.nav-user-info) {
-            position: absolute;
-            top: 14px;
-            right: 20px;
-            z-index: 20;
-            width: max-content;
-        }
-
-        .nav-user-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            height: 44px;
-        }
-
-        .nav-bell {
-            color: #CBD5E1;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 40px;
-            width: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            position: relative;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-        .nav-bell:hover { color: white; background: rgba(255, 255, 255, 0.08); }
-        .bell-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; }
-
-        .nav-user {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            height: 40px;
-            padding: 0 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 999px;
-            color: white;
-            font-weight: 600;
-            font-size: 14.5px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            max-width: 240px;
-        }
-
-        .nav-user:hover { background: rgba(255, 255, 255, 0.08); }
-
         div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
         > div[data-testid="stElementContainer"]:has(.nav-btn-marker) + div[data-testid="stElementContainer"] {
             position: absolute;
@@ -1776,12 +1708,7 @@ def load_css():
             opacity: 0;
             pointer-events: none;
             transition: transform 0.25s ease, opacity 0.2s ease;
-            transition: transform 0.25s ease, opacity 0.2s ease, top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             max-height: 80vh;
-        }
-
-        .mobile-dropdown.nav-scrolled {
-            top: 60px;
         }
 
         .mobile-nav-links {
@@ -1846,9 +1773,7 @@ def load_css():
             div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
             > div[data-testid="stElementContainer"]:has(.nav-btn-marker),
             div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
-            > div[data-testid="stElementContainer"]:has(.nav-btn-marker) + div[data-testid="stElementContainer"],
-            div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
-            > div[data-testid="stElementContainer"]:has(.nav-user-info) {
+            > div[data-testid="stElementContainer"]:has(.nav-btn-marker) + div[data-testid="stElementContainer"] {
                 display: none !important;
             }
         }
@@ -2206,50 +2131,6 @@ def load_css():
         }
 
         </style>
-
-        <script>
-        (function() {
-            const setupScroll = () => {
-                const container = window.parent.document.querySelector('[data-testid="stAppViewContainer"]') || window.parent.document.querySelector('.stApp') || window.parent;
-
-                const handleScroll = (e) => {
-                    const navBg = window.parent.document.querySelector('.nav-background');
-                    const navInner = window.parent.document.querySelector('.nav-container-inner');
-                    const mobileDropdown = window.parent.document.querySelector('.mobile-dropdown');
-
-                    let top = 0;
-                    if (e && e.target && e.target.scrollTop !== undefined) {
-                        top = e.target.scrollTop;
-                    } else if (container.scrollTop !== undefined) {
-                        top = container.scrollTop;
-                    } else {
-                        top = window.parent.scrollY || 0;
-                    }
-
-                    if (navBg && navInner) {
-                        if (top > 50) {
-                            navBg.classList.add('nav-scrolled');
-                            navInner.classList.add('nav-scrolled');
-                            if (mobileDropdown) mobileDropdown.classList.add('nav-scrolled');
-                        } else {
-                            navBg.classList.remove('nav-scrolled');
-                            navInner.classList.remove('nav-scrolled');
-                            if (mobileDropdown) mobileDropdown.classList.remove('nav-scrolled');
-                        }
-                    }
-                };
-
-                handleScroll();
-
-                if (container.addEventListener) {
-                    container.removeEventListener('scroll', window.parent._navScrollHandler, { passive: true });
-                    window.parent._navScrollHandler = handleScroll;
-                    container.addEventListener('scroll', handleScroll, { passive: true });
-                }
-            };
-            setTimeout(setupScroll, 100);
-        })();
-        </script>
         """,
 
     )
