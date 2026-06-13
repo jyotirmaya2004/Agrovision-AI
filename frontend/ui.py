@@ -44,18 +44,18 @@ def render_navbar(current_page: str = "Home"):
         user_id = st.session_state.get("user_id", "")
         avatar = st.session_state.get("avatar", "🧑‍🌾")
         ts = int(time.time() * 1000)
-        st.html(f"""<img src="empty_{ts}" style="display:none" onerror="const d=new Date(); d.setTime(d.getTime()+(30*24*60*60*1000)); document.cookie='agrovision_user={username};expires='+d.toUTCString()+';path=/'; localStorage.setItem('agrovision_user', '{username}'); localStorage.setItem('agrovision_id', '{user_id}'); localStorage.setItem('agrovision_avatar', '{avatar}');">""")
+        st.html(f"""<img src="empty_{ts}" style="display:none" onerror="const d=new Date(); d.setTime(d.getTime()+(30*24*60*60*1000)); document.cookie='plantexa_user={username};expires='+d.toUTCString()+';path=/'; localStorage.setItem('plantexa_user', '{username}'); localStorage.setItem('plantexa_id', '{user_id}'); localStorage.setItem('plantexa_avatar', '{avatar}');">""")
         st.session_state.set_cookie = None
         st.session_state.sync_session = False
 
     if st.session_state.get("clear_cookie"):
         ts = int(time.time() * 1000)
-        st.html(f"""<img src="empty_{ts}" style="display:none" onerror="document.cookie='agrovision_user=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/'; localStorage.removeItem('agrovision_user'); localStorage.removeItem('agrovision_id'); localStorage.removeItem('agrovision_avatar');">""")
+        st.html(f"""<img src="empty_{ts}" style="display:none" onerror="document.cookie='plantexa_user=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/'; localStorage.removeItem('plantexa_user'); localStorage.removeItem('plantexa_id'); localStorage.removeItem('plantexa_avatar');">""")
         st.session_state.clear_cookie = False
 
     # 2. Auto-login via native browser cookie if user is not in session state
     if not st.session_state.get("username") and not st.session_state.get("clear_cookie") and hasattr(st, "context") and hasattr(st.context, "cookies"):
-        saved_username = st.context.cookies.get("agrovision_user")
+        saved_username = st.context.cookies.get("plantexa_user")
         if saved_username:
             try:
                 from supabase import create_client
@@ -137,9 +137,9 @@ def render_navbar(current_page: str = "Home"):
         }
 
         const checkSession = () => {
-            const user = localStorage.getItem('agrovision_user');
-            const id = localStorage.getItem('agrovision_id');
-            const avatar = localStorage.getItem('agrovision_avatar');
+            const user = localStorage.getItem('plantexa_user');
+            const id = localStorage.getItem('plantexa_id');
+            const avatar = localStorage.getItem('plantexa_avatar');
             const pyLoggedIn = """ + py_logged_in + """;
 
             if (user && !pyLoggedIn && !window.location.search.includes('session_restore_user')) {
@@ -162,9 +162,9 @@ def render_navbar(current_page: str = "Home"):
         <div class="nav-orb nav-orb-right"></div>
 
         <div class="nav-container-inner">
-            <div class="nav-brand" aria-label="AgroVision AI">
+            <div class="nav-brand" aria-label="Plantexa AI">
                 <div class="brand-icon"><i class="fa-solid fa-leaf"></i></div>
-                <span class="nav-brand-title">AgroVision AI</span>
+                <span class="nav-brand-title">Plantexa AI</span>
             </div>
 
             <div class="nav-right">
@@ -262,7 +262,7 @@ def require_username(force=False):
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <h1 style="margin: 0 0 12px 0; font-family: 'Poppins', sans-serif; font-size: 32px !important; color: var(--leaf-text);">Authentication Required</h1>
-                <p style="margin: 0; color: var(--leaf-muted); font-size: 18px; max-width: 600px; margin-left: auto; margin-right: auto;">Please log in or create an account to securely access AgroVision AI and save your history.</p>
+                <p style="margin: 0; color: var(--leaf-muted); font-size: 18px; max-width: 600px; margin-left: auto; margin-right: auto;">Please log in or create an account to securely access Plantexa AI and save your history.</p>
             </div>
             """
         )
@@ -493,7 +493,7 @@ def _generate_report_pdf(image_bytes, prediction, disease_info):
     )
 
     story = []
-    story.append(Paragraph("<b>AgroVision AI - Plant Health Report Card</b>", title_style))
+    story.append(Paragraph("<b>Plantexa AI - Plant Health Report Card</b>", title_style))
     story.append(Spacer(1, 10))
 
     if image_bytes:
@@ -571,7 +571,7 @@ def _generate_report_pdf(image_bytes, prediction, disease_info):
         canvas.saveState()
         canvas.setFont('Helvetica', 9)
         canvas.setFillColor(colors.dimgrey)
-        footer_text = f"AgroVision AI Report Card - Page {doc.page}"
+        footer_text = f"Plantexa AI Report Card - Page {doc.page}"
         canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, footer_text)
         date_str = datetime.now().strftime("%B %d, %Y")
         canvas.drawString(0.5 * inch, 0.5 * inch, date_str)
@@ -608,7 +608,7 @@ def _generate_history_pdf(history_data):
     )
 
     story = []
-    story.append(Paragraph("<b>AgroVision AI - Prediction History</b>", title_style))
+    story.append(Paragraph("<b>Plantexa AI - Prediction History</b>", title_style))
     story.append(Spacer(1, 10))
 
     if history_data:
@@ -675,7 +675,7 @@ def _generate_history_pdf(history_data):
         canvas.saveState()
         canvas.setFont('Helvetica', 9)
         canvas.setFillColor(colors.dimgrey)
-        footer_text = f"AgroVision AI History - Page {doc.page}"
+        footer_text = f"Plantexa AI History - Page {doc.page}"
         canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, footer_text)
         date_str = datetime.now().strftime("%B %d, %Y")
         canvas.drawString(0.5 * inch, 0.5 * inch, date_str)
@@ -887,7 +887,7 @@ def render_prediction_section(image_file):
         if st.download_button(
             label="Download Full Report Card",
             data=pdf_bytes,
-            file_name=f"agrovision_report_{safe_name}.pdf",
+            file_name=f"plantexa_report_{safe_name}.pdf",
             mime="application/pdf",
         ):
             st.markdown('<div class="success-msg-anim"><i class="fa-solid fa-circle-check"></i> Report downloaded successfully!</div>', unsafe_allow_html=True)
@@ -920,7 +920,7 @@ def render_history_section():
             if st.download_button(
                 label="Download History PDF",
                 data=pdf_bytes,
-                file_name="agrovision_ai_history.pdf",
+                file_name="plantexa_ai_history.pdf",
                 mime="application/pdf",
                 use_container_width=True,
             ):
@@ -987,7 +987,7 @@ def render_footer():
                 <!-- Column 1: Brand -->
                 <div class="footer-col">
                     <div class="f-logo">
-                        <i class="fa-solid fa-leaf f-logo-icon"></i> AgroVision AI
+                        <i class="fa-solid fa-leaf f-logo-icon"></i> Plantexa AI
                     </div>
                     <p class="f-desc">AI-powered plant disease diagnosis and crop health intelligence platform.</p>
                     <div class="f-badges">
@@ -1040,7 +1040,7 @@ def render_footer():
 
             <!-- Bottom Copyright Section -->
             <div class="footer-bottom">
-                <p>&copy; 2026 AgroVision AI</p>
+                <p>&copy; 2026 Plantexa AI</p>
                 <p>Built with Streamlit <i class="fa-solid fa-plus" style="font-size:10px; margin:0 4px; color:var(--leaf-primary);"></i> Deep Learning <i class="fa-solid fa-plus" style="font-size:10px; margin:0 4px; color:var(--leaf-primary);"></i> NVIDIA AI</p>
             </div>
         </div>

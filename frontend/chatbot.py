@@ -10,7 +10,7 @@ from openai import OpenAI
 NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 DEFAULT_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
 SYSTEM_PROMPT = """
-You are AgroVision AI, a professional agronomist and plant pathologist.
+You are Plantexa AI, a professional agronomist and plant pathologist.
 Provide expert, scientifically accurate advice on plant diseases, crop care, fertilizers, and pest management.
 Keep your responses extremely concise, using short bullet points and direct, actionable recommendations.
 If the user asks about topics outside of agriculture or botany, politely decline and steer the conversation back to plant health.
@@ -178,7 +178,7 @@ def _generate_pdf_transcript(messages):
     styles = getSampleStyleSheet()
     story = []
 
-    story.append(Paragraph("AgroVision AI - Chat Transcript", styles["Title"]))
+    story.append(Paragraph("Plantexa AI - Chat Transcript", styles["Title"]))
     story.append(Spacer(1, 20))
 
     def format_text(text):
@@ -197,7 +197,7 @@ def _generate_pdf_transcript(messages):
     for msg in messages:
         is_user = msg["role"] == "user"
 
-        role_name = 'User' if is_user else 'AgroVision AI'
+        role_name = 'User' if is_user else 'Plantexa AI'
         color = '#1b4332' if is_user else '#2d6a4f'
 
         role_html = f'<font color="{color}"><b>{role_name}:</b></font>'
@@ -287,7 +287,7 @@ def _generate_pdf_transcript(messages):
         canvas.saveState()
         canvas.setFont('Helvetica', 9)
         canvas.setFillColor(colors.dimgrey)
-        footer_text = f"AgroVision AI Chat Transcript - Page {doc.page}"
+        footer_text = f"Plantexa AI Chat Transcript - Page {doc.page}"
         canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, footer_text)
         date_str = datetime.now().strftime("%B %d, %Y")
         canvas.drawString(0.5 * inch, 0.5 * inch, date_str)
@@ -305,7 +305,7 @@ def chatbot_ui():
         fab_container = st.container()
         with fab_container:
             st.markdown('<div class="chat-fab-marker"></div>', unsafe_allow_html=True)
-            if st.button("Open Chat", key="open_chat", help="Open AgroVision AI chat"):
+            if st.button("Open Chat", key="open_chat", help="Open Plantexa AI chat"):
                 st.session_state.chat_open = True
                 st.rerun()
         return
@@ -317,17 +317,17 @@ def chatbot_ui():
 
         col_title, col_download, col_clear, col_close = st.columns([5, 1, 1, 1])
         with col_title:
-            st.html('<div class="chat-title" style="margin-top: 8px;"><i class="fa-solid fa-robot"></i> AgroVision AI Assistant</div>')
+            st.html('<div class="chat-title" style="margin-top: 8px;"><i class="fa-solid fa-robot"></i> Plantexa AI Assistant</div>')
         with col_download:
             # Download chat history
             st.markdown('<div class="chat-btn-download-marker"></div>', unsafe_allow_html=True)
             pdf_bytes = _generate_pdf_transcript(st.session_state.messages)
 
             prediction = st.session_state.get("prediction")
-            pdf_filename = "agrovision_ai_chat_transcript.pdf"
+            pdf_filename = "plantexa_ai_chat_transcript.pdf"
             if prediction and prediction.get("disease"):
                 safe_name = re.sub(r'[^a-zA-Z0-9]+', '_', prediction["disease"]).strip('_').lower()
-                pdf_filename = f"agrovision_ai_{safe_name}_transcript.pdf"
+                pdf_filename = f"plantexa_ai_{safe_name}_transcript.pdf"
 
             if pdf_bytes:
                 st.download_button(

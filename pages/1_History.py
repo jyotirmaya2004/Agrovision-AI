@@ -45,7 +45,7 @@ else:
             if st.download_button(
                 label="Download History PDF",
                 data=pdf_bytes,
-                file_name="agrovision_ai_history.pdf",
+                file_name="plantexa_ai_history.pdf",
                 mime="application/pdf",
                 use_container_width=True,
             ):

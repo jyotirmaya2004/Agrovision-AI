@@ -6,7 +6,7 @@ import streamlit as st
 
 
 st.set_page_config(
-    page_title="AgroVision AI",
+    page_title="Plantexa AI",
     page_icon=":seedling:",
     layout="wide",
     initial_sidebar_state="expanded",

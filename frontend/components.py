@@ -9,7 +9,7 @@ def landing_hero() -> None:
             <div class="saas-hero-grid">
                 <!-- Left Column: Content & CTAs -->
                 <div class="hero-left">
-                    <div class="hero-logo"><i class="fa-solid fa-leaf"></i> AgroVision AI</div>
+                    <div class="hero-logo"><i class="fa-solid fa-leaf"></i> Plantexa AI</div>
                     <h1 class="hero-title-main">AI-Powered Plant Disease Detection</h1>
                     <p class="hero-subtitle-main">Upload a leaf image and receive instant disease diagnosis, confidence analysis, treatment recommendations, and prevention strategies.</p>
 

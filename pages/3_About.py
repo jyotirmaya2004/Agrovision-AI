@@ -15,7 +15,7 @@ st.set_page_config(
 load_css()
 render_navbar("About")
 page_header(
-    "About AgroVision AI",
+    "About Plantexa AI",
     "An AI-powered plant leaf disease detection system with practical crop-care guidance.",
     "fa-circle-info",
 )
@@ -25,7 +25,7 @@ st.html(
     """
     <div class="glass-card" style="padding: 24px; margin-bottom: 24px;">
         <p style="color: var(--leaf-muted); font-size: 16px; margin: 0;">
-            AgroVision AI uses a two-stage deep learning workflow. It first checks
+            Plantexa AI uses a two-stage deep learning workflow. It first checks
             whether the uploaded image looks like a plant leaf, then predicts the
             most likely disease and shows symptoms, causes, treatment, and prevention
             guidance from the disease knowledge base.

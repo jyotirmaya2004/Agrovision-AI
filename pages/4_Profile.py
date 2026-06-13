@@ -26,7 +26,7 @@ if st.session_state.get("new_account"):
         </div>
         <div>
             <h3 style="margin: 0; font-size: 20px; color: var(--leaf-text); font-family: 'Poppins', sans-serif;">Account Created Successfully!</h3>
-            <p style="margin: 4px 0 0 0; color: var(--leaf-muted); font-size: 15px;">Welcome to AgroVision AI, <strong>{username}</strong>. Your profile is all set up and ready to go.</p>
+            <p style="margin: 4px 0 0 0; color: var(--leaf-muted); font-size: 15px;">Welcome to Plantexa AI, <strong>{username}</strong>. Your profile is all set up and ready to go.</p>
         </div>
     </div>
     """)
