@@ -355,7 +355,7 @@ def chatbot_ui():
 
         col_title, col_download, col_clear, col_close = st.columns([5, 1, 1, 1])
         with col_title:
-            st.html('<div class="chat-title" style="margin-top: 8px;"><i class="fa-solid fa-robot"></i> Plantexa AI Assistant</div>')
+            st.html('<div class="chat-title" style="margin-top: 8px;" title="Double-click and hold to drag panel"><i class="fa-solid fa-robot"></i> Plantexa AI Assistant</div>')
         with col_download:
             # Download chat history
             st.markdown('<div class="chat-btn-download-marker"></div>', unsafe_allow_html=True)
@@ -448,7 +448,7 @@ def chatbot_ui():
 
                     loader_placeholder = st.empty()
                     with loader_placeholder:
-                        st.markdown('<div class="chat-thinking"><i class="fa-solid fa-circle-notch fa-spin"></i> Thinking...</div>', unsafe_allow_html=True)
+                        st.markdown('<div class="typing-indicator"><span></span><span></span><span></span></div>', unsafe_allow_html=True)
 
                     try:
                         stream = _chat_with_nvidia_stream()

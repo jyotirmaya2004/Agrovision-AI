@@ -995,20 +995,57 @@ def load_css():
         }
 
         div[data-testid="metric-container"]{
-            background:var(--leaf-panel);
-            border-radius:14px;
-            padding:14px;
-            border:1px solid var(--leaf-border);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        div[data-testid="metric-container"]::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--leaf-primary), var(--leaf-accent));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
         }
 
         div[data-testid="metric-container"]:hover {
-            transform: translateY(-4px);
-            border-color: rgba(34, 197, 94, 0.4);
-            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.15);
-            background: rgba(15, 23, 42, 0.8);
+            transform: translateY(-6px);
+            border-color: rgba(34, 197, 94, 0.3);
+            box-shadow: 0 15px 35px rgba(34, 197, 94, 0.2);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        div[data-testid="metric-container"]:hover::before {
+            transform: scaleX(1);
+        }
+
+        div[data-testid="stMetricLabel"], div[data-testid="stMetricLabel"] > * {
+            color: var(--leaf-muted) !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        div[data-testid="stMetricValue"] {
+            color: var(--leaf-text) !important;
+            font-size: 28px !important;
+            font-weight: 800 !important;
+            font-family: 'Poppins', sans-serif !important;
+            transition: color 0.3s ease !important;
+        }
+
+        div[data-testid="metric-container"]:hover div[data-testid="stMetricValue"] {
+            color: var(--leaf-primary) !important;
         }
 
         div[data-testid="stExpander"]{
@@ -1185,7 +1222,8 @@ def load_css():
             min-height: 56px !important;
             border-radius: 999px !important;
             border: 1px solid rgba(82,183,136,0.55) !important;
-            background: linear-gradient(135deg, rgba(82,183,136,0.95), rgba(45,106,79,0.95)) !important;
+            background: linear-gradient(135deg, var(--leaf-primary), var(--leaf-accent), var(--leaf-primary-dark), var(--leaf-primary)) !important;
+            background-size: 300% 300% !important;
             box-shadow: var(--leaf-shadow) !important;
             color: white !important;
             display: flex !important;
@@ -1193,7 +1231,7 @@ def load_css():
             justify-content: center !important;
             padding: 0 !important;
             position: relative !important;
-            animation: chatFabPulse 2.5s infinite !important;
+            animation: chatFabPulse 2.5s infinite, gradientShift 4s ease infinite !important;
         }
 
         @keyframes chatFabPulse {
@@ -1229,8 +1267,11 @@ def load_css():
             right: 18px;
             bottom: 150px;
             width: min(420px, calc(100vw - 36px));
+            min-width: 320px;
+            min-height: 350px;
             max-height: 80vh;
-            overflow-y: auto;
+            overflow: auto;
+            resize: both;
             z-index: 10000;
             background: rgba(8,28,21,0.85);
             backdrop-filter: blur(16px);
@@ -2285,6 +2326,20 @@ def load_css():
             animation: dashboardSlideUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
         }
         .dashboard-slide-up-marker { display: none; }
+
+        .staggered-slide-up {
+            opacity: 0;
+            animation: dashboardSlideUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+
+        @keyframes chatPanelPop {
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .chat-floating-panel-marker) {
+            transform-origin: bottom right;
+            animation: chatPanelPop 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
         </style>
         <script>
         const initCounters = () => {
@@ -2304,11 +2359,71 @@ def load_css():
                 requestAnimationFrame(update);
             });
         };
+
+        const initChatDrag = () => {
+            const marker = document.querySelector('.chat-floating-panel-marker');
+            if (marker) {
+                const panel = marker.closest('div[data-testid="stVerticalBlock"]');
+                if (panel && !panel.dataset.dragAttached) {
+                    panel.dataset.dragAttached = 'true';
+                    let isDragging = false;
+                    let offsetX, offsetY;
+
+                    panel.addEventListener('mousedown', (e) => {
+                        const tag = e.target.tagName.toLowerCase();
+                        if (['input', 'button', 'textarea'].includes(tag) || e.target.closest('button')) return;
+
+                        // Prevent drag if clicking the resize handle (bottom-right area)
+                        const rect = panel.getBoundingClientRect();
+                        if (e.clientX > rect.right - 20 && e.clientY > rect.bottom - 20) return;
+
+                        if (e.detail === 2) {
+                            isDragging = true;
+                            offsetX = e.clientX - rect.left;
+                            offsetY = e.clientY - rect.top;
+                            panel.style.cursor = 'grabbing';
+                            panel.style.animation = 'none';
+                            panel.style.transition = 'none';
+
+                            // Prevent text selection while dragging
+                            document.body.style.userSelect = 'none';
+                            window.getSelection().removeAllRanges();
+                            e.preventDefault();
+                        }
+                    });
+
+                    document.addEventListener('mousemove', (e) => {
+                        if (!isDragging) return;
+                        e.preventDefault();
+                        panel.style.left = (e.clientX - offsetX) + 'px';
+                        panel.style.top = (e.clientY - offsetY) + 'px';
+                        panel.style.bottom = 'auto';
+                        panel.style.right = 'auto';
+                    });
+
+                    document.addEventListener('mouseup', () => {
+                        if (isDragging) {
+                            isDragging = false;
+                            panel.style.cursor = 'auto';
+                            // Restore text selection
+                            document.body.style.userSelect = '';
+                        }
+                    });
+                }
+            }
+        };
+
+        const runObservers = () => {
+            initCounters();
+            initChatDrag();
+        };
+
         // Initial run
-        setTimeout(initCounters, 100);
-        if (!window.counterObserver) {
-            window.counterObserver = new MutationObserver(initCounters);
-            window.counterObserver.observe(document.body, { childList: true, subtree: true });
+        setTimeout(runObservers, 100);
+        if (!window.customUiObserver) {
+            if (window.counterObserver) { window.counterObserver.disconnect(); }
+            window.customUiObserver = new MutationObserver(runObservers);
+            window.customUiObserver.observe(document.body, { childList: true, subtree: true });
         }
         </script>
         """

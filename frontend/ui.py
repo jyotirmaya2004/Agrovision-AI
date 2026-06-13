@@ -1122,15 +1122,15 @@ def render_tips_section():
 
     st.html("""
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
-        <div class="glass-card" style="padding: 20px; border-top: 3px solid #3b82f6;">
+        <div class="glass-card staggered-slide-up" style="padding: 20px; border-top: 3px solid #3b82f6; animation-delay: 0s;">
             <h4 style="margin-top:0; color: #60a5fa; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-droplet"></i> Watering</h4>
             <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">Water at the base of the plant to prevent leaf wetness and fungal growth.</p>
         </div>
-        <div class="glass-card" style="padding: 20px; border-top: 3px solid #eab308;">
+        <div class="glass-card staggered-slide-up" style="padding: 20px; border-top: 3px solid #eab308; animation-delay: 0.15s;">
             <h4 style="margin-top:0; color: #fde047; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-sun"></i> Sunlight</h4>
             <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">Ensure proper canopy pruning to allow UV light to naturally disinfect lower leaves.</p>
         </div>
-        <div class="glass-card" style="padding: 20px; border-top: 3px solid #a855f7;">
+        <div class="glass-card staggered-slide-up" style="padding: 20px; border-top: 3px solid #a855f7; animation-delay: 0.3s;">
             <h4 style="margin-top:0; color: #c084fc; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-wind"></i> Airflow</h4>
             <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">Maintain adequate spacing between crops to reduce humidity and powdery mildew risk.</p>
         </div>
