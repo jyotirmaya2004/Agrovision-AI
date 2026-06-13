@@ -982,6 +982,14 @@ def load_css():
             border:1px solid var(--leaf-border);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+
+        div[data-testid="metric-container"]:hover {
+            transform: translateY(-4px);
+            border-color: rgba(34, 197, 94, 0.4);
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.15);
+            background: rgba(15, 23, 42, 0.8);
         }
 
         div[data-testid="stExpander"]{
@@ -1411,6 +1419,18 @@ def load_css():
             background: rgba(82,183,136,0.15) !important;
         }
 
+        /* --- Hide SPA Router Bridge --- */
+        .hidden-spa-marker { display: none; }
+
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .hidden-spa-marker) {
+            position: absolute !important;
+            width: 0 !important;
+            height: 0 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            overflow: hidden !important;
+        }
+
         /* --- Global Scrollbar Styling --- */
         ::-webkit-scrollbar {
             width: 14px;
@@ -1640,7 +1660,8 @@ def load_css():
         div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
         > div[data-testid="stElementContainer"]:has(.nav-btn-marker) + div[data-testid="stElementContainer"] {
             position: absolute;
-            top: 14px;
+            top: 50%;
+            transform: translateY(-50%);
             /* keep CTA well separated from nav links */
             right: 40px;
             z-index: 20;
@@ -1680,10 +1701,16 @@ def load_css():
 
         div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
         > div[data-testid="stElementContainer"]:has(.nav-btn-marker.logged-in) + div[data-testid="stElementContainer"] button {
-            background: rgba(255, 255, 255, 0.05) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            background: rgba(239, 68, 68, 0.1) !important;
+            color: #ef4444 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
             box-shadow: none !important;
             padding: 0 18px !important;
+        }
+
+        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
+        > div[data-testid="stElementContainer"]:has(.nav-btn-marker.logged-in) + div[data-testid="stElementContainer"] button:hover {
+            background: rgba(239, 68, 68, 0.15) !important;
         }
 
         /* Mobile dropdown */
@@ -1866,271 +1893,175 @@ def load_css():
             z-index: 2;
         }
 
-        /* Stats Bar */
+        /* Stat Bar */
         .footer-stats {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 32px 40px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 16px;
-            margin-bottom: 40px;
             flex-wrap: wrap;
+            padding: 24px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 32px;
             gap: 20px;
         }
-        .f-stat {
-            text-align: center;
-            flex: 1;
-            min-width: 150px;
-        }
-        .f-stat-val {
-            display: block;
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--leaf-primary);
-            font-family: 'Poppins', sans-serif;
-            line-height: 1.2;
-        }
-        .f-stat-label {
-            font-size: 13px;
-            color: var(--leaf-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
+        .f-stat { text-align: center; flex: 1; min-width: 120px; }
+        .f-stat-val { display: block; font-size: 28px; font-weight: 800; color: var(--leaf-text); font-family: 'Poppins', sans-serif; }
+        .f-stat-label { font-size: 13px; color: var(--leaf-primary); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 
         /* Trust Indicators */
         .footer-trust {
             display: flex;
             justify-content: center;
-            gap: 32px;
+            gap: 24px;
             flex-wrap: wrap;
-            margin-bottom: 48px;
-            padding-bottom: 40px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .footer-trust span {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--leaf-muted);
+            margin-bottom: 40px;
             font-size: 14px;
+            color: var(--leaf-muted);
             font-weight: 500;
         }
-        .footer-trust i {
-            color: var(--leaf-primary);
-        }
+        .footer-trust i { color: var(--leaf-primary); margin-right: 8px; }
 
-        /* Grid Layout */
+        /* Columns Grid */
         .footer-grid {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr 1.5fr;
             gap: 40px;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
         }
 
-        .f-heading {
-            color: var(--leaf-text);
+        /* Column Elements */
+        .f-logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
             font-family: 'Poppins', sans-serif;
-            font-size: 16px;
-            margin-top: 0;
-            margin-bottom: 24px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .f-logo-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--leaf-primary);
+            border-radius: 8px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
         }
 
         .f-desc {
             color: var(--leaf-muted);
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.6;
             margin-bottom: 24px;
+        }
+
+        .f-badges { display: flex; gap: 12px; flex-wrap: wrap; }
+        .f-badge {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--leaf-text);
+        }
+        .nvidia-badge {
+            background: rgba(118, 185, 0, 0.1);
+            border-color: rgba(118, 185, 0, 0.3);
+            color: #76B900;
+        }
+
+        .f-heading {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 20px;
+            margin-top: 0;
+            font-family: 'Poppins', sans-serif;
         }
 
         .f-link, .f-social {
             display: block;
             color: var(--leaf-muted);
             text-decoration: none;
+            font-size: 15px;
             margin-bottom: 12px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        .f-social i {
-            width: 20px;
-            text-align: center;
-            margin-right: 8px;
+            transition: all 0.2s ease;
         }
         .f-link:hover, .f-social:hover {
             color: var(--leaf-primary);
             transform: translateX(4px);
-            text-shadow: 0 0 12px rgba(34,197,94,0.4);
         }
-
-        /* Brand Column */
-        .f-logo {
-            font-size: 24px;
-            font-weight: 800;
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        .f-logo-icon {
+        .f-social i {
+            width: 20px;
             color: var(--leaf-primary);
-            animation: fLeafWave 3s ease-in-out infinite;
-            transform-origin: bottom center;
-        }
-        @keyframes fLeafWave {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(15deg); }
-        }
-
-        .f-badges {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .f-badge {
-            padding: 4px 10px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .f-badge.nvidia-badge {
-            color: #76b900;
-            border-color: rgba(118, 185, 0, 0.3);
-            background: rgba(118, 185, 0, 0.1);
         }
 
         /* Newsletter Form */
         .f-form {
             display: flex;
+            align-items: center;
             gap: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 4px;
         }
         .f-input {
-            flex: 1;
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.2);
-            color: white;
+            background: transparent;
+            border: none;
+            color: var(--leaf-text);
+            padding: 10px 12px;
+            font-size: 14px;
+            width: 100%;
             outline: none;
-            transition: border 0.3s;
             font-family: 'Inter', sans-serif;
         }
-        .f-input:focus {
-            border-color: var(--leaf-primary);
-        }
         .f-submit {
-            padding: 0 16px;
             background: var(--leaf-primary);
-            color: white;
+            color: #000;
             border: none;
+            width: 36px;
+            height: 36px;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
         }
         .f-submit:hover {
-            background: var(--leaf-primary-dark);
-            box-shadow: 0 0 15px rgba(34,197,94,0.4);
+            background: var(--leaf-accent);
             transform: scale(1.05);
         }
 
-        /* Bottom Copyright */
+        /* Bottom Section */
         .footer-bottom {
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 32px;
-            border-top: 1px solid rgba(255,255,255,0.05);
             color: var(--leaf-muted);
-            font-size: 13px;
+            font-size: 14px;
             flex-wrap: wrap;
             gap: 16px;
         }
-        .footer-bottom p {
-            margin: 0;
-        }
+        .footer-bottom p { margin: 0; }
 
-        /* Responsive */
+        /* Responsive Footer */
         @media (max-width: 1024px) {
-            .footer-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .footer-stats {
-                justify-content: space-around;
-            }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
         }
-
         @media (max-width: 768px) {
-            .footer-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-            .f-logo {
-                justify-content: center;
-            }
-            .f-badges {
-                justify-content: center;
-            }
-            .f-link:hover, .f-social:hover {
-                transform: translateY(-2px) translateX(0);
-            }
-            .footer-trust {
-                flex-direction: column;
-                align-items: center;
-                gap: 16px;
-            }
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-            }
-            .f-form {
-                max-width: 400px;
-                margin: 0 auto;
-            }
-            .f-stat {
-                min-width: 45%;
-            }
+            .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+            .f-link:hover, .f-social:hover { transform: none; }
         }
-
-        /* --- Responsive Auth & Centered Containers --- */
-        .auth-container-marker { display: none; }
-        div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .auth-container-marker) {
-            max-width: 500px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* --- Global Mobile App View Padding & Tabs --- */
-        @media (max-width: 768px) {
-            .block-container,
-            [data-testid="stAppViewBlockContainer"] {
-                padding-top: 90px !important;
-                padding-left: 16px !important;
-                padding-right: 16px !important;
-            }
-
-            button[data-baseweb="tab"] {
-                padding: 10px 12px !important;
-                font-size: 13.5px !important;
-                flex: 1;
-                text-align: center;
-                justify-content: center;
-            }
-            div[data-baseweb="tab-list"] {
-                display: flex;
-                width: 100%;
-                overflow-x: auto;
-                flex-wrap: nowrap;
-            }
-        }
-
         </style>
-        """,
-
+        """
     )

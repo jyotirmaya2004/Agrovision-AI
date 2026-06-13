@@ -26,6 +26,52 @@ from frontend.styles import load_css
 load_dotenv()
 
 def render_navbar(current_page: str = "Home"):
+    # Auto-login via session_restore query param
+    restore_user = st.query_params.get("session_restore_user")
+    if restore_user and not st.session_state.get("username"):
+        st.session_state.username = restore_user
+        st.session_state.user_id = st.query_params.get("session_restore_id")
+        st.session_state.avatar = st.query_params.get("session_restore_avatar", "🧑‍🌾")
+        st.session_state.last_activity = time.time()
+
+        if "session_restore_user" in st.query_params: del st.query_params["session_restore_user"]
+        if "session_restore_id" in st.query_params: del st.query_params["session_restore_id"]
+        if "session_restore_avatar" in st.query_params: del st.query_params["session_restore_avatar"]
+
+    # 1. Handle cookie & session setting/clearing flags from previous reruns
+    if st.session_state.get("set_cookie") or st.session_state.get("sync_session"):
+        username = st.session_state.get("username", "")
+        user_id = st.session_state.get("user_id", "")
+        avatar = st.session_state.get("avatar", "🧑‍🌾")
+        ts = int(time.time() * 1000)
+        st.html(f"""<img src="empty_{ts}" style="display:none" onerror="const d=new Date(); d.setTime(d.getTime()+(30*24*60*60*1000)); document.cookie='agrovision_user={username};expires='+d.toUTCString()+';path=/'; localStorage.setItem('agrovision_user', '{username}'); localStorage.setItem('agrovision_id', '{user_id}'); localStorage.setItem('agrovision_avatar', '{avatar}');">""")
+        st.session_state.set_cookie = None
+        st.session_state.sync_session = False
+
+    if st.session_state.get("clear_cookie"):
+        ts = int(time.time() * 1000)
+        st.html(f"""<img src="empty_{ts}" style="display:none" onerror="document.cookie='agrovision_user=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/'; localStorage.removeItem('agrovision_user'); localStorage.removeItem('agrovision_id'); localStorage.removeItem('agrovision_avatar');">""")
+        st.session_state.clear_cookie = False
+
+    # 2. Auto-login via native browser cookie if user is not in session state
+    if not st.session_state.get("username") and not st.session_state.get("clear_cookie") and hasattr(st, "context") and hasattr(st.context, "cookies"):
+        saved_username = st.context.cookies.get("agrovision_user")
+        if saved_username:
+            try:
+                from supabase import create_client
+                supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
+                supabase_key = os.getenv("SUPABASE_KEY")
+                if supabase_key:
+                    supabase = create_client(supabase_url, supabase_key)
+                    response = supabase.table("app_users").select("id, avatar").eq("username", saved_username).limit(1).execute()
+                    if response.data:
+                        st.session_state.username = saved_username
+                        st.session_state.user_id = response.data[0].get("id")
+                        st.session_state.avatar = response.data[0].get("avatar") or "🧑‍🌾"
+                        st.session_state.last_activity = time.time()
+            except Exception:
+                pass
+
     # Handle mobile menu auth actions via query params
     action = st.query_params.get("action")
     if action == "login":
@@ -35,19 +81,78 @@ def render_navbar(current_page: str = "Home"):
         st.rerun()
     elif action == "logout":
         st.session_state.clear()
+        st.session_state.clear_cookie = True
         if "action" in st.query_params:
             del st.query_params["action"]
         st.rerun()
 
     is_logged_in = bool(st.session_state.get("username"))
     if not is_logged_in:
-        mobile_auth_link = '<a href="?action=login" target="_self" class="nav-link mobile-nav-link" style="color: #22C55E; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 16px;"><i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i> Get Started</a>'
+        mobile_auth_link = '<a href="/?action=login" class="nav-link mobile-nav-link" style="color: #22C55E; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 16px;"><i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i> Get Started</a>'
     else:
-        mobile_auth_link = f'<a href="?action=logout" target="_self" class="nav-link mobile-nav-link" style="color: #ef4444; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 16px;"><i class="fa-solid fa-right-from-bracket" style="margin-right: 8px;"></i> Logout ({st.session_state.get("username", "User")})</a>'
+        mobile_auth_link = f'<a href="/?action=logout" class="nav-link mobile-nav-link" style="color: #ef4444; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 16px;"><i class="fa-solid fa-right-from-bracket" style="margin-right: 8px;"></i> Logout ({st.session_state.get("username", "User")})</a>'
 
     nav_container = st.container()
     with nav_container:
         st.markdown('<div class="navbar-container-marker"></div>', unsafe_allow_html=True)
+
+        py_logged_in = 'true' if is_logged_in else 'false'
+        js_code = """
+        const initSPA = () => {
+            document.querySelectorAll(".nav-link").forEach(link => {
+                if (link.dataset.spaAttached) return;
+                const href = link.getAttribute("href");
+                if (!href || href.includes("?action=") || href.startsWith("#")) return;
+                link.dataset.spaAttached = "true";
+                link.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    let targetText = link.innerText.trim();
+                    const hiddenLinks = document.querySelectorAll("a[data-testid=stPageLink]");
+                    let matched = false;
+
+                    let searchPath = href.replace(/^\\/+/, "").toLowerCase();
+                    if (searchPath === "") searchPath = "home";
+
+                    hiddenLinks.forEach(hl => {
+                        if (matched) return;
+                        const hlHref = (hl.getAttribute("href") || "").replace(/^\\/+/, "").toLowerCase();
+                        const hlText = hl.innerText.trim().toLowerCase();
+
+                        if (hlHref && (hlHref === searchPath || hlHref.includes(searchPath))) {
+                            hl.click();
+                            matched = true;
+                        } else if (hlText === targetText.toLowerCase() || hlText.includes(targetText.toLowerCase())) {
+                            hl.click();
+                            matched = true;
+                        }
+                    });
+                    if (!matched) window.location.href = href;
+                });
+            });
+        };
+        initSPA();
+        if (!window.spaObserver) {
+            window.spaObserver = new MutationObserver(initSPA);
+            window.spaObserver.observe(document.body, { childList: true, subtree: true });
+        }
+
+        const checkSession = () => {
+            const user = localStorage.getItem('agrovision_user');
+            const id = localStorage.getItem('agrovision_id');
+            const avatar = localStorage.getItem('agrovision_avatar');
+            const pyLoggedIn = """ + py_logged_in + """;
+
+            if (user && !pyLoggedIn && !window.location.search.includes('session_restore_user')) {
+                const url = new URL(window.location);
+                url.searchParams.set('session_restore_user', user);
+                if (id) url.searchParams.set('session_restore_id', id);
+                if (avatar) url.searchParams.set('session_restore_avatar', avatar);
+                url.searchParams.delete('action');
+                window.location.replace(url.toString());
+            }
+        };
+        checkSession();
+        """.replace('\n', ' ')
 
         st.html(f"""
         <input type="checkbox" id="mobile-menu-toggle" class="mobile-menu-toggle">
@@ -64,12 +169,12 @@ def render_navbar(current_page: str = "Home"):
 
             <div class="nav-right">
                 <div class="nav-links" role="navigation" aria-label="Primary">
-                    <a href="/" target="_self" class="nav-link{' active' if current_page == 'Home' else ''}">Home</a>
-                    <a href="Dataset" target="_self" class="nav-link{' active' if current_page == 'Dataset' else ''}">Dataset</a>
-                    <a href="History" target="_self" class="nav-link{' active' if current_page == 'History' else ''}">History</a>
-                    <a href="Profile" target="_self" class="nav-link{' active' if current_page == 'Profile' else ''}">Profile</a>
-                    <a href="About" target="_self" class="nav-link{' active' if current_page == 'About' else ''}">About</a>
-                    <a href="Admin" target="_self" class="nav-link{' active' if current_page == 'Admin' else ''}">Admin</a>
+                    <a href="/" class="nav-link{' active' if current_page == 'Home' else ''}">Home</a>
+                    <a href="/Dataset" class="nav-link{' active' if current_page == 'Dataset' else ''}">Dataset</a>
+                    <a href="/History" class="nav-link{' active' if current_page == 'History' else ''}">History</a>
+                    <a href="/Profile" class="nav-link{' active' if current_page == 'Profile' else ''}">Profile</a>
+                    <a href="/About" class="nav-link{' active' if current_page == 'About' else ''}">About</a>
+                    <a href="/Admin" class="nav-link{' active' if current_page == 'Admin' else ''}">Admin</a>
                 </div>
 
                 <div class="nav-cta-slot" aria-hidden="true"></div>
@@ -84,12 +189,12 @@ def render_navbar(current_page: str = "Home"):
 
         <div class="mobile-dropdown" role="dialog" aria-label="Mobile navigation">
             <div class="mobile-nav-links">
-                <a href="/" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Home' else ''}"><i class="fa-solid fa-house" style="margin-right: 8px;"></i> Home</a>
-                <a href="Dataset" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Dataset' else ''}"><i class="fa-solid fa-database" style="margin-right: 8px;"></i> Dataset</a>
-                <a href="History" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'History' else ''}"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 8px;"></i> History</a>
-                <a href="Profile" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Profile' else ''}"><i class="fa-solid fa-user" style="margin-right: 8px;"></i> Profile</a>
-                <a href="About" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'About' else ''}"><i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> About</a>
-                <a href="Admin" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Admin' else ''}"><i class="fa-solid fa-lock" style="margin-right: 8px;"></i> Admin</a>
+                <a href="/" class="nav-link mobile-nav-link{' active' if current_page == 'Home' else ''}"><i class="fa-solid fa-house" style="margin-right: 8px;"></i> Home</a>
+                <a href="/Dataset" class="nav-link mobile-nav-link{' active' if current_page == 'Dataset' else ''}"><i class="fa-solid fa-database" style="margin-right: 8px;"></i> Dataset</a>
+                <a href="/History" class="nav-link mobile-nav-link{' active' if current_page == 'History' else ''}"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 8px;"></i> History</a>
+                <a href="/Profile" class="nav-link mobile-nav-link{' active' if current_page == 'Profile' else ''}"><i class="fa-solid fa-user" style="margin-right: 8px;"></i> Profile</a>
+                <a href="/About" class="nav-link mobile-nav-link{' active' if current_page == 'About' else ''}"><i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> About</a>
+                <a href="/Admin" class="nav-link mobile-nav-link{' active' if current_page == 'Admin' else ''}"><i class="fa-solid fa-lock" style="margin-right: 8px;"></i> Admin</a>
                 {mobile_auth_link}
             </div>
         </div>
@@ -115,12 +220,40 @@ def render_navbar(current_page: str = "Home"):
             st.html('<div class="nav-btn-marker logged-in"></div>')
             if st.button("Logout", key="logout_navbar", use_container_width=True):
                 st.session_state.clear()
+                st.session_state.clear_cookie = True
                 st.rerun()
 
+    # Render hidden Streamlit page links inside a container to act as SPA routing targets
+    spa_container = st.container()
+    with spa_container:
+        st.markdown('<div class="hidden-spa-marker"></div>', unsafe_allow_html=True)
+        st.page_link("app.py", label="Home")
+        st.page_link("pages/2_Dataset.py", label="Dataset")
+        st.page_link("pages/1_History.py", label="History")
+        st.page_link("pages/4_Profile.py", label="Profile")
+        st.page_link("pages/3_About.py", label="About")
+        st.page_link("pages/3_Admin.py", label="Admin")
+
 def require_username(force=False):
+    # 1. Check for inactivity timeout (1800 seconds = 30 minutes)
+    if st.session_state.get("username"):
+        last_active = st.session_state.get("last_activity", time.time())
+        if time.time() - last_active > 1800:
+            st.session_state.clear()
+            st.session_state.clear_cookie = True
+            st.session_state.show_auth = True
+            st.session_state.logout_reason = "Session expired due to 30 minutes of inactivity. Please log in again."
+            st.rerun()
+        else:
+            st.session_state.last_activity = time.time()
+
     if not st.session_state.get("username"):
         if not force and not st.session_state.get("show_auth", False):
             return
+
+        if st.session_state.get("logout_reason"):
+            st.warning(st.session_state.logout_reason)
+            st.session_state.logout_reason = "" # Clear after displaying
 
         st.html(
             """
@@ -158,6 +291,9 @@ def require_username(force=False):
                                         st.session_state.username = username.strip()
                                         st.session_state.user_id = response.data[0].get("id")
                                         st.session_state.avatar = response.data[0].get("avatar") or "🧑‍🌾"
+                                        st.session_state.set_cookie = username.strip()
+                                        st.session_state.sync_session = True
+                                        st.session_state.last_activity = time.time()
                                         st.session_state.show_auth = False
                                         st.rerun()
                                     else:
@@ -208,7 +344,11 @@ def require_username(force=False):
                                     st.session_state.username = new_username.strip()
                                     st.session_state.user_id = insert_res.data[0].get("id")
                                     st.session_state.avatar = avatar_emoji
+                                    st.session_state.set_cookie = new_username.strip()
+                                    st.session_state.sync_session = True
+                                    st.session_state.last_activity = time.time()
                                     st.session_state.show_auth = False
+                                    st.session_state.new_account = True
                                     st.rerun()
                                 else:
                                     st.error("Failed to create new user account.")
