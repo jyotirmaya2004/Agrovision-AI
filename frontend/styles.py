@@ -1522,7 +1522,8 @@ def load_css():
             max-width: 1440px;
             margin: 0 auto;
             height: var(--nav-height);
-            padding: 0 calc(var(--nav-x-pad) + 140px);
+            padding-left: var(--nav-x-pad);
+            padding-right: calc(var(--nav-x-pad) + 140px);
         }
 
 
@@ -1749,6 +1750,8 @@ def load_css():
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
             display: flex;
             flex-direction: column;
             padding: 0;

@@ -119,7 +119,7 @@ def render_navbar(current_page: str = "Home"):
                 </div>
             </div>
             """)
-            st.html('<div class="nav-btn-marker logged-in"></div>', unsafe_allow_html=True)
+            st.html('<div class="nav-btn-marker logged-in"></div>')
             if st.button("Logout", key="logout_navbar", use_container_width=True):
                 st.session_state.clear()
                 st.rerun()
