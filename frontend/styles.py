@@ -1824,6 +1824,8 @@ def load_css():
             div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
             > div[data-testid="stElementContainer"]:has(.nav-btn-marker),
             div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
+            > div[data-testid="stElementContainer"]:has(.nav-btn-marker) + div[data-testid="stElementContainer"],
+            div[data-testid="stVerticalBlock"]:has(> div[data-testid="stElementContainer"] .navbar-container-marker)
             > div[data-testid="stElementContainer"]:has(.nav-user-info) {
                 display: none !important;
             }

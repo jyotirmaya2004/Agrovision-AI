@@ -26,6 +26,25 @@ from frontend.styles import load_css
 load_dotenv()
 
 def render_navbar(current_page: str = "Home"):
+    # Handle mobile menu auth actions via query params
+    action = st.query_params.get("action")
+    if action == "login":
+        st.session_state.show_auth = True
+        if "action" in st.query_params:
+            del st.query_params["action"]
+        st.rerun()
+    elif action == "logout":
+        st.session_state.clear()
+        if "action" in st.query_params:
+            del st.query_params["action"]
+        st.rerun()
+
+    is_logged_in = bool(st.session_state.get("username"))
+    if not is_logged_in:
+        mobile_auth_link = '<a href="?action=login" target="_self" class="nav-link mobile-nav-link" style="color: #22C55E; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 16px;"><i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i> Get Started</a>'
+    else:
+        mobile_auth_link = f'<a href="?action=logout" target="_self" class="nav-link mobile-nav-link" style="color: #ef4444; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 16px;"><i class="fa-solid fa-right-from-bracket" style="margin-right: 8px;"></i> Logout ({st.session_state.get("username", "User")})</a>'
+
     nav_container = st.container()
     with nav_container:
         st.markdown('<div class="navbar-container-marker"></div>', unsafe_allow_html=True)
@@ -69,7 +88,7 @@ def render_navbar(current_page: str = "Home"):
                 <a href="/History" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'History' else ''}">History</a>
                 <a href="/About" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'About' else ''}">About</a>
                 <a href="/Admin" target="_self" class="nav-link mobile-nav-link{' active' if current_page == 'Admin' else ''}">Admin</a>
-
+                {mobile_auth_link}
             </div>
         </div>
         """)
@@ -79,8 +98,6 @@ def render_navbar(current_page: str = "Home"):
         # For desktop, show a toggle-style auth CTA:
         # - logged out: show "Get Started" that triggers the authentication card
         # - logged in: show a red-themed "Logout" button
-        is_logged_in = bool(st.session_state.get("username"))
-
         if not is_logged_in:
             st.html('<div class="nav-btn-marker logged-out"></div>')
             # Show a desktop Get Started button. This should NOT affect mobile.
