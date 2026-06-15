@@ -52,7 +52,7 @@ if not st.session_state.get("admin_authenticated", False):
             else:
                 st.error("Incorrect admin password.")
 
-    # Rendont er chatbot and stop execution so the database remains hidden
+    # Render chatbot and stop execution so the database remains hidden
     chatbot_ui()
     st.stop()
 
@@ -62,16 +62,8 @@ if st.button("Lock Dashboard", key="lock_dashboard"):
     st.rerun()
 
 try:
-    from supabase import create_client
-    supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
-    supabase_key = os.getenv("SUPABASE_KEY")
-    if not supabase_key:
-        st.error("SUPABASE_KEY not found in .env file.")
-        st.stop()
-
-    supabase = create_client(supabase_url, supabase_key)
-    # Fetch predictions and automatically join the username from the app_users table
-    response = supabase.table("user_predictions").select("id, timestamp, disease, confidence, image_url, user_id, app_users(username)").execute()
+    from backend.db import get_all_predictions, delete_prediction, delete_all_predictions
+    response = get_all_predictions()
     df = pd.DataFrame(response.data)
 
     if not df.empty:
@@ -110,12 +102,12 @@ try:
             row_id = st.selectbox("Select Record ID to delete", df["id"].tolist(), label_visibility="collapsed")
         with col_btn_del:
             if st.button("Delete Row", use_container_width=True):
-                supabase.table("user_predictions").delete().eq("id", row_id).execute()
+                delete_prediction(row_id)
                 st.rerun()
         with col_btn_all:
             confirm_delete = st.checkbox("Confirm wipe", help="Check this box to enable the delete button")
             if st.button("Delete ALL", type="primary", use_container_width=True, disabled=not confirm_delete):
-                supabase.table("user_predictions").delete().neq("id", -1).execute() # .neq is a wildcard to delete all rows
+                delete_all_predictions()
                 st.rerun()
         st.html("<br>")
 

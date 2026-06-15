@@ -9,7 +9,7 @@ import pandas as pd
 import streamlit as st
 from PIL import Image as PILImage
 
-from backend.disease_info import get_disease_details
+from backend.disease_info import get_disease_details, _t
 from backend.predict_two_stage import PredictionError, predict_two_stage
 from frontend.components import (
     empty_placeholder,
@@ -20,20 +20,18 @@ from frontend.components import (
     top_predictions_card,
 )
 
+@st.cache_data(ttl=300, show_spinner=False)
+def _fetch_history_cached(user_id):
+    from backend.db import fetch_user_history
+    rows = fetch_user_history(user_id)
+    return [{"Timestamp": r["timestamp"], "Disease": r["disease"], "Confidence": r["confidence"], "Image_URL": r.get("image_url")} for r in rows]
 
 def load_history():
     user_id = st.session_state.get("user_id")
     if not user_id:
         return []
     try:
-        from supabase import create_client
-        supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
-        supabase_key = os.getenv("SUPABASE_KEY")
-        if supabase_key:
-            supabase = create_client(supabase_url, supabase_key)
-            response = supabase.table("user_predictions").select("*").eq("user_id", user_id).order("id").execute()
-            rows = response.data
-            return [{"Timestamp": r["timestamp"], "Disease": r["disease"], "Confidence": r["confidence"], "Image_URL": r.get("image_url")} for r in rows]
+        return _fetch_history_cached(user_id)
     except Exception as e:
         st.warning(f"Could not load history from Supabase: {e}")
     return []
@@ -43,19 +41,16 @@ def append_history(item):
     if not user_id:
         return
     try:
-        from supabase import create_client
-        supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
-        supabase_key = os.getenv("SUPABASE_KEY")
-        if supabase_key:
-            supabase = create_client(supabase_url, supabase_key)
-            record = {
-                "user_id": user_id,
-                "timestamp": item["Timestamp"],
-                "disease": item["Disease"],
-                "confidence": item["Confidence"],
-                "image_url": item.get("Image_URL")
-            }
-            supabase.table("user_predictions").insert(record).execute()
+        from backend.db import insert_history_record
+        record = {
+            "user_id": user_id,
+            "timestamp": item["Timestamp"],
+            "disease": item["Disease"],
+            "confidence": item["Confidence"],
+            "image_url": item.get("Image_URL")
+        }
+        insert_history_record(record)
+        _fetch_history_cached.clear()
     except Exception as e:
         st.warning(f"Could not save history to Supabase: {e}")
 
@@ -64,12 +59,9 @@ def clear_history():
     if not user_id:
         return
     try:
-        from supabase import create_client
-        supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
-        supabase_key = os.getenv("SUPABASE_KEY")
-        if supabase_key:
-            supabase = create_client(supabase_url, supabase_key)
-            supabase.table("user_predictions").delete().eq("user_id", user_id).execute()
+        from backend.db import clear_user_history
+        clear_user_history(user_id)
+        _fetch_history_cached.clear()
     except Exception as e:
         st.warning(f"Could not clear history: {e}")
 
@@ -83,31 +75,31 @@ def render_upload_section():
     col_input, col_preview = st.columns([1.3, 1], gap="large")
 
     with col_input:
-        st.subheader("Choose Input Method")
+        st.subheader(_t("Choose Input Method"))
         default_source = 1 if st.query_params.get("source") == "camera" else 0
         source_choice = st.radio(
-            "Select Input Method",
-            ["Upload from device", "Use camera"],
+            _t("Select Input Method"),
+            [_t("Upload from device"), _t("Use camera")],
             index=default_source,
             horizontal=True,
             label_visibility="collapsed"
         )
 
-        if source_choice == "Use camera":
-            image_file = st.camera_input("Take a clear leaf photo", label_visibility="collapsed")
+        if source_choice in ["Use camera", _t("Use camera")]:
+            image_file = st.camera_input(_t("Take a clear leaf photo"), label_visibility="collapsed")
         else:
             image_file = st.file_uploader(
-                "Choose a leaf image",
+                _t("Choose a leaf image"),
                 type=["jpg", "jpeg", "png", "webp", "bmp", "gif", "tiff", "heic", "heif"],
                 label_visibility="collapsed"
             )
 
     with col_preview:
-        st.subheader("Analysis Readiness")
+        st.subheader(_t("Analysis Readiness"))
         if image_file:
             st.image(image_file, caption="Ready for analysis", use_container_width=True)
             size_mb = len(image_file.getvalue()) / (1024 * 1024)
-            st.caption(f"**Status:** Valid File | **File Size:** {size_mb:.2f} MB")
+            st.caption(f"**{_t('Status')}:** {_t('Valid File')} | **{_t('File Size')}:** {size_mb:.2f} MB")
         else:
             empty_placeholder("fa-image", "No Image Selected", "Your selected image will appear here.")
 
@@ -122,6 +114,8 @@ def _generate_report_pdf(image_bytes, prediction, disease_info):
         from reportlab.platypus import Image as RLImage
         from reportlab.lib import colors
         from reportlab.lib.units import inch
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
     except ImportError:
         return None
 
@@ -130,6 +124,18 @@ def _generate_report_pdf(image_bytes, prediction, disease_info):
         buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40
     )
     styles = getSampleStyleSheet()
+
+    # Safely attempt to register a custom Unicode font if provided
+    base_font = "Helvetica"
+    font_path = os.path.join(os.path.dirname(__file__), "..", "assets", "fonts", "UnicodeFont.ttf")
+    if os.path.exists(font_path):
+        try:
+            pdfmetrics.registerFont(TTFont('UnicodeFont', font_path))
+            base_font = 'UnicodeFont'
+        except Exception:
+            pass
+
+    styles.add(ParagraphStyle(name='TranslatedText', parent=styles['Normal'], fontName=base_font))
 
     title_style = ParagraphStyle(
         'CustomTitle',
@@ -171,22 +177,49 @@ def _generate_report_pdf(image_bytes, prediction, disease_info):
 
             # Proportionally scale image to fit nicely on the document
             img_width, img_height = pil_img.size
-            max_w, max_h = 400.0, 250.0
+
+            gradcam_b64 = prediction.get("gradcam_b64")
+            max_w = 250.0 if gradcam_b64 else 400.0
+            max_h = 250.0
+
             ratio = min(max_w / img_width, max_h / img_height)
             new_w, new_h = img_width * ratio, img_height * ratio
 
             rl_img = RLImage(clean_img_io, width=new_w, height=new_h)
+            img_elements = [rl_img]
 
-            img_table = Table([[rl_img]], colWidths=[new_w + 10])
+            if gradcam_b64:
+                import base64
+                gc_io = io.BytesIO(base64.b64decode(gradcam_b64))
+                gc_img = PILImage.open(gc_io).convert('RGB')
+                gc_clean_io = io.BytesIO()
+                gc_img.save(gc_clean_io, format='JPEG')
+                gc_clean_io.seek(0)
+                rl_gc_img = RLImage(gc_clean_io, width=new_w, height=new_h)
+                img_elements.append(rl_gc_img)
+
+            img_table = Table([img_elements], colWidths=[new_w + 10] * len(img_elements))
             img_table.setStyle(TableStyle([
                 ('ALIGN', (0,0), (-1,-1), 'CENTER'),
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
                 ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#cbd5e1')),
+                ('INNERGRID', (0,0), (-1,-1), 1, colors.HexColor('#cbd5e1')),
                 ('TOPPADDING', (0,0), (-1,-1), 5),
                 ('BOTTOMPADDING', (0,0), (-1,-1), 5),
                 ('LEFTPADDING', (0,0), (-1,-1), 5),
                 ('RIGHTPADDING', (0,0), (-1,-1), 5),
             ]))
+
+            if len(img_elements) > 1:
+                title_table = Table([
+                    [Paragraph("<para align='center'><b>Original Image</b></para>", styles["Normal"]),
+                     Paragraph("<para align='center'><b>Grad-CAM Heatmap</b></para>", styles["Normal"])]
+                ], colWidths=[new_w + 10, new_w + 10])
+                title_table.setStyle(TableStyle([
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 2),
+                ]))
+                story.append(title_table)
+
             story.append(img_table)
             story.append(Spacer(1, 20))
         except Exception:
@@ -220,7 +253,7 @@ def _generate_report_pdf(image_bytes, prediction, disease_info):
             if section in disease_info and disease_info[section]:
                 story.append(Paragraph(f"{section.title()}", h2_style))
                 text = disease_info[section].replace("<", "&lt;").replace(">", "&gt;")
-                story.append(Paragraph(text, styles["Normal"]))
+                story.append(Paragraph(text, styles["TranslatedText"]))
                 story.append(Spacer(1, 8))
 
     def add_footer(canvas, doc):
@@ -353,7 +386,7 @@ def render_prediction_section(image_file):
         return
 
     st.markdown('<div class="analyze-btn-marker"></div><div class="analyze-btn-spacer"></div>', unsafe_allow_html=True)
-    analyze_clicked = st.button("Analyze Leaf", type="primary", use_container_width=True)
+    analyze_clicked = st.button(_t("Analyze Leaf"), type="primary", use_container_width=True)
 
     if analyze_clicked:
         # Require authentication to perform an analysis
@@ -365,28 +398,13 @@ def render_prediction_section(image_file):
             st.write("☁️ Uploading image to Supabase...")
             image_url = None
             try:
-                from supabase import create_client
-                supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
-                supabase_key = os.getenv("SUPABASE_KEY")
-
-                if supabase_key:
-                    supabase = create_client(supabase_url, supabase_key)
-                    file_ext = "jpg"
-                    if hasattr(image_file, "name") and "." in image_file.name:
-                        file_ext = image_file.name.split('.')[-1]
-
-                    file_name = f"{uuid.uuid4()}.{file_ext}"
-
-                    supabase.storage.from_("Leafimage").upload(
-                        path=file_name,
-                        file=image_file.getvalue(),
-                        file_options={"content-type": image_file.type if hasattr(image_file, "type") else "image/jpeg"}
-                    )
-                    image_url = supabase.storage.from_("Leafimage").get_public_url(file_name)
-                else:
-                    st.warning("SUPABASE_KEY not found in .env file. Upload skipped.")
-            except ImportError:
-                st.warning("Supabase package not installed. Please run `pip install supabase`.")
+                from backend.db import upload_image
+                file_ext = "jpg"
+                if hasattr(image_file, "name") and "." in image_file.name:
+                    file_ext = image_file.name.split('.')[-1]
+                file_name = f"{uuid.uuid4()}.{file_ext}"
+                content_type = image_file.type if hasattr(image_file, "type") else "image/jpeg"
+                image_url = upload_image(file_name, image_file.getvalue(), content_type)
             except Exception as e:
                 error_msg = str(e).lower()
                 if "policy" in error_msg or "row-level security" in error_msg or "unauthorized" in error_msg:
@@ -401,38 +419,6 @@ def render_prediction_section(image_file):
                 time.sleep(0.5)
                 st.write("🧬 Running disease classification model...")
                 result = predict_two_stage(image_file, top_k=3)
-
-                st.write("☁️ Uploading image to Supabase...")
-                image_url = None
-                try:
-                    from supabase import create_client
-                    supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
-                    supabase_key = os.getenv("SUPABASE_KEY")
-
-                    if supabase_key:
-                        supabase = create_client(supabase_url, supabase_key)
-                        file_ext = "jpg"
-                        if hasattr(image_file, "name") and "." in image_file.name:
-                            file_ext = image_file.name.split('.')[-1]
-
-                        file_name = f"{uuid.uuid4()}.{file_ext}"
-
-                        supabase.storage.from_("Leafimage").upload(
-                            path=file_name,
-                            file=image_file.getvalue(),
-                            file_options={"content-type": image_file.type if hasattr(image_file, "type") else "image/jpeg"}
-                        )
-                        image_url = supabase.storage.from_("Leafimage").get_public_url(file_name)
-                    else:
-                        st.warning("SUPABASE_KEY not found in .env file. Upload skipped.")
-                except ImportError:
-                    st.warning("Supabase package not installed. Please run `pip install supabase`.")
-                except Exception as e:
-                    error_msg = str(e).lower()
-                    if "policy" in error_msg or "row-level security" in error_msg or "unauthorized" in error_msg:
-                        st.warning("⚠️ Image upload blocked by Supabase policy restrictions. Please check your storage bucket permissions.")
-                    else:
-                        st.warning(f"Could not upload image to Supabase: {e}")
 
                 st.session_state.prediction = result
 
@@ -500,32 +486,54 @@ def render_prediction_section(image_file):
         if show_debug:
             st.json(result["leaf_validation"])
 
+        gradcam_b64 = result.get("gradcam_b64")
+        if gradcam_b64:
+            st.html("<br>")
+            section_title("Explainable AI (Grad-CAM)", "fa-eye")
+            st.info("This heatmap shows the exact regions of the leaf the neural network focused on to make its diagnosis. Warmer colors (red/orange) indicate higher importance.")
+            st.html(f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 24px;">
+                <div class="glass-card" style="padding: 16px; display: inline-block;">
+                    <img src="data:image/jpeg;base64,{gradcam_b64}" style="max-width: 100%; max-height: 400px; border-radius: 12px; display: block;">
+                </div>
+            </div>
+            """)
+
         st.html("<br>")
         section_title("Diagnosis & Treatment Hub", "fa-briefcase-medical")
-        disease_info = get_disease_details(result["class_name"])
 
-        tab_sym, tab_treat, tab_prev, tab_comp = st.tabs(["Symptoms & Causes", "Treatment Plans", "Prevention", "Similar Diseases"])
+        raw_disease_info = get_disease_details(result["class_name"])
+        selected_code = st.session_state.get("lang_code", "en")
+
+        if selected_code != "en":
+            from backend.disease_info import translate_disease_info
+            with st.spinner(_t("Translating guidance...")):
+                disease_info = translate_disease_info(raw_disease_info, selected_code)
+        else:
+            disease_info = raw_disease_info
+
+        tab_sym, tab_treat, tab_prev, tab_comp = st.tabs([_t("Symptoms & Causes"), _t("Treatment Plans"), _t("Prevention"), _t("Similar Diseases")])
 
         with tab_sym:
-            st.write("### Disease Description & Symptoms")
+            st.write(f"### {_t('Disease Description & Symptoms')}")
             st.write(disease_info.get("symptoms", "No symptom information available."))
-            st.write("### Primary Causes")
+            st.write(f"### {_t('Primary Causes')}")
             st.write(disease_info.get("causes", "No cause information available."))
 
         with tab_treat:
-            st.write("### AI Recommended Treatments")
-            st.info("The following treatments are scientifically recommended based on your diagnosis.")
+            st.write(f"### {_t('AI Recommended Treatments')}")
+            st.info(_t("The following treatments are scientifically recommended based on your diagnosis."))
             st.write(disease_info.get("treatment", "No treatment information available."))
             col_c1, col_c2 = st.columns(2)
             with col_c1:
-                st.metric("Estimated Treatment Cost", "Low - Moderate")
+                st.metric(_t("Estimated Treatment Cost"), _t("Low - Moderate"))
             with col_c2:
-                st.metric("Effectiveness Score", "High (85-95%)")
+                st.metric(_t("Effectiveness Score"), _t("High (85-95%)"))
 
         with tab_prev:
-            st.write("### Best Practices & Prevention")
+            st.write(f"### {_t('Best Practices & Prevention')}")
             st.write(disease_info.get("prevention", "No prevention information available."))
-            st.success("Follow these practices to prevent future outbreaks and maintain crop health.")
+            st.success(_t("Follow these practices to prevent future outbreaks and maintain crop health."))
 
         with tab_comp:
             st.write("### Disease Comparison")
@@ -541,6 +549,7 @@ def render_prediction_section(image_file):
         st.info("Save a detailed PDF report of this diagnosis, including the uploaded image and treatment guidelines.")
 
         image_bytes = image_file.getvalue() if image_file else None
+        # Now that Unicode fonts are supported, we can safely pass the translated disease_info
         pdf_bytes = _generate_report_pdf(image_bytes, result, disease_info)
 
         if pdf_bytes:
@@ -629,7 +638,7 @@ def render_tips_section():
 
 
 def render_footer():
-    st.html("""
+    st.html(f"""
     <div class="saas-footer">
         <div class="footer-gradient-line"></div>
 
@@ -642,19 +651,19 @@ def render_footer():
         <div class="footer-content">
             <!-- Statistics Bar -->
             <div class="footer-stats">
-                <div class="f-stat"><span class="f-stat-val">15+</span><span class="f-stat-label">Plant Species</span></div>
-                <div class="f-stat"><span class="f-stat-val">38+</span><span class="f-stat-label">Diseases</span></div>
-                <div class="f-stat"><span class="f-stat-val">98%</span><span class="f-stat-label">Accuracy</span></div>
-                <div class="f-stat"><span class="f-stat-val">10K+</span><span class="f-stat-label">Analyses</span></div>
+                <div class="f-stat"><span class="f-stat-val">15+</span><span class="f-stat-label">{_t('Plant Species')}</span></div>
+                <div class="f-stat"><span class="f-stat-val">38+</span><span class="f-stat-label">{_t('Diseases')}</span></div>
+                <div class="f-stat"><span class="f-stat-val">98%</span><span class="f-stat-label">{_t('Accuracy')}</span></div>
+                <div class="f-stat"><span class="f-stat-val">10K+</span><span class="f-stat-label">{_t('Analyses')}</span></div>
             </div>
 
             <!-- Trust Indicators -->
             <div class="footer-trust">
-                <span><i class="fa-solid fa-check"></i> AI Powered</span>
-                <span><i class="fa-solid fa-check"></i> NVIDIA Accelerated</span>
-                <span><i class="fa-solid fa-check"></i> Secure Uploads</span>
-                <span><i class="fa-solid fa-check"></i> Real-Time Analysis</span>
-                <span><i class="fa-solid fa-check"></i> Research Grade Models</span>
+                <span><i class="fa-solid fa-check"></i> {_t('AI Powered')}</span>
+                <span><i class="fa-solid fa-check"></i> {_t('NVIDIA Accelerated')}</span>
+                <span><i class="fa-solid fa-check"></i> {_t('Secure Uploads')}</span>
+                <span><i class="fa-solid fa-check"></i> {_t('Real-Time Analysis')}</span>
+                <span><i class="fa-solid fa-check"></i> {_t('Research Grade Models')}</span>
             </div>
 
             <!-- Main Columns -->
@@ -664,49 +673,49 @@ def render_footer():
                     <div class="f-logo">
                         <i class="fa-solid fa-leaf f-logo-icon"></i> Plantexa AI
                     </div>
-                    <p class="f-desc">AI-powered plant disease diagnosis and crop health intelligence platform.</p>
+                    <p class="f-desc">{_t('AI-powered plant disease diagnosis and crop health intelligence platform.')}</p>
                     <div class="f-badges">
                         <span class="f-badge">v2.0.0</span>
-                        <span class="f-badge nvidia-badge"><i class="fa-solid fa-microchip"></i> Powered by NVIDIA AI</span>
+                        <span class="f-badge nvidia-badge"><i class="fa-solid fa-microchip"></i> {_t('Powered by NVIDIA AI')}</span>
                     </div>
                 </div>
 
                 <!-- Column 2: Navigation -->
                 <div class="footer-col">
-                    <h4 class="f-heading">Navigation</h4>
-                    <a href="#diagnosis-section" class="f-link">Home</a>
-                    <a href="#diagnosis-section" class="f-link">Disease Detection</a>
-                    <a href="?tab=history" class="f-link">Prediction History</a>
-                    <a href="?tab=history" class="f-link">Reports</a>
-                    <a href="#diagnosis-section" class="f-link">Dashboard</a>
-                    <a href="#diagnosis-section" class="f-link">Analytics</a>
-                    <a href="?tab=chat" class="f-link">Chat Assistant</a>
+                    <h4 class="f-heading">{_t('Navigation')}</h4>
+                    <a href="#diagnosis-section" class="f-link">{_t('Home')}</a>
+                    <a href="#diagnosis-section" class="f-link">{_t('Disease Detection')}</a>
+                    <a href="?tab=history" class="f-link">{_t('Prediction History')}</a>
+                    <a href="?tab=history" class="f-link">{_t('Reports')}</a>
+                    <a href="#diagnosis-section" class="f-link">{_t('Dashboard')}</a>
+                    <a href="#diagnosis-section" class="f-link">{_t('Analytics')}</a>
+                    <a href="?tab=chat" class="f-link">{_t('Chat Assistant')}</a>
                 </div>
 
                 <!-- Column 3: Resources -->
                 <div class="footer-col">
-                    <h4 class="f-heading">Resources</h4>
-                    <a href="#" class="f-link">Documentation</a>
-                    <a href="#" class="f-link">User Guide</a>
+                    <h4 class="f-heading">{_t('Resources')}</h4>
+                    <a href="#" class="f-link">{_t('Documentation')}</a>
+                    <a href="#" class="f-link">{_t('User Guide')}</a>
                     <a href="#" class="f-link">FAQ</a>
-                    <a href="#" class="f-link">API Reference</a>
-                    <a href="#" class="f-link">Privacy Policy</a>
-                    <a href="#" class="f-link">Terms & Conditions</a>
+                    <a href="#" class="f-link">{_t('API Reference')}</a>
+                    <a href="#" class="f-link">{_t('Privacy Policy')}</a>
+                    <a href="#" class="f-link">{_t('Terms & Conditions')}</a>
                 </div>
 
                 <!-- Column 4: Contact & Newsletter -->
                 <div class="footer-col">
-                    <h4 class="f-heading">Connect</h4>
+                    <h4 class="f-heading">{_t('Connect')}</h4>
                     <a href="#" class="f-social"><i class="fa-brands fa-github"></i> GitHub</a>
                     <a href="#" class="f-social"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
-                    <a href="#" class="f-social"><i class="fa-solid fa-envelope"></i> Email</a>
-                    <a href="#" class="f-social"><i class="fa-solid fa-briefcase"></i> Portfolio</a>
-                    <a href="#" class="f-social"><i class="fa-solid fa-headset"></i> Contact Us</a>
+                    <a href="#" class="f-social"><i class="fa-solid fa-envelope"></i> {_t('Email')}</a>
+                    <a href="#" class="f-social"><i class="fa-solid fa-briefcase"></i> {_t('Portfolio')}</a>
+                    <a href="#" class="f-social"><i class="fa-solid fa-headset"></i> {_t('Contact Us')}</a>
 
                     <div style="margin-top: 24px;">
-                        <p class="f-desc" style="margin-bottom: 8px;">Get latest crop disease updates</p>
+                        <p class="f-desc" style="margin-bottom: 8px;">{_t('Get latest crop disease updates')}</p>
                         <form class="f-form" onsubmit="event.preventDefault();">
-                            <input type="email" placeholder="Email address..." class="f-input" />
+                            <input type="email" placeholder="{_t('Email address...')}" class="f-input" />
                             <button type="submit" class="f-submit"><i class="fa-solid fa-arrow-right"></i></button>
                         </form>
                     </div>
@@ -716,7 +725,7 @@ def render_footer():
             <!-- Bottom Copyright Section -->
             <div class="footer-bottom">
                 <p>&copy; 2026 Plantexa AI</p>
-                <p>Built with Streamlit <i class="fa-solid fa-plus" style="font-size:10px; margin:0 4px; color:var(--leaf-primary);"></i> Deep Learning <i class="fa-solid fa-plus" style="font-size:10px; margin:0 4px; color:var(--leaf-primary);"></i> NVIDIA AI</p>
+                <p>{_t('Built with Streamlit')} <i class="fa-solid fa-plus" style="font-size:10px; margin:0 4px; color:var(--leaf-primary);"></i> {_t('Deep Learning')} <i class="fa-solid fa-plus" style="font-size:10px; margin:0 4px; color:var(--leaf-primary);"></i> NVIDIA AI</p>
             </div>
         </div>
     </div>

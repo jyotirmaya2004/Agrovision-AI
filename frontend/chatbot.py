@@ -5,7 +5,9 @@ import re
 import streamlit as st
 from dotenv import load_dotenv
 from openai import OpenAI
+from tenacity import retry, stop_after_attempt, wait_exponential
 
+from backend.disease_info import _t
 
 NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 DEFAULT_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
@@ -46,13 +48,13 @@ def reset_chat():
     st.session_state.messages = [
         {
             "role": "assistant",
-            "content": "Hello! Ask me about leaf diseases, crop care, pests, fertilizers, or treatment steps.",
+            "content": _t("Hello! Ask me about leaf diseases, crop care, pests, fertilizers, or treatment steps."),
         }
     ]
     st.session_state.followups = [
-        "How to identify leaf diseases?",
-        "What are common pests?",
-        "How to improve soil health?",
+        _t("How to identify leaf diseases?"),
+        _t("What are common pests?"),
+        _t("How to improve soil health?"),
     ]
 
 
@@ -67,9 +69,9 @@ def initialize_chat():
 
     if "followups" not in st.session_state:
         st.session_state.followups = [
-            "How to identify leaf diseases?",
-            "What are common pests?",
-            "How to improve soil health?",
+            _t("How to identify leaf diseases?"),
+            _t("What are common pests?"),
+            _t("How to improve soil health?"),
         ]
 
 
@@ -90,7 +92,8 @@ def _chat_with_nvidia_stream():
         yield "NVIDIA_API_KEY is missing. Add it to your .env file and restart Streamlit."
         return
 
-    system_prompt = SYSTEM_PROMPT
+    app_lang = st.session_state.get("app_lang", "English")
+    system_prompt = _t(SYSTEM_PROMPT) + f"\n\nIMPORTANT: You must reply entirely in {app_lang}."
 
     username = st.session_state.get("username")
     avatar = st.session_state.get("avatar")
@@ -146,12 +149,14 @@ def _chat_with_nvidia_stream():
             yield chunk.choices[0].delta.content
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 def _generate_followups(messages) -> list[str]:
     client = _build_client()
     if not client:
         return []
 
-    sys_prompt = "Suggest exactly 3 short follow-up questions for the user based on the conversation. Output them strictly on a single line separated by a pipe character `|`. Do not include any intro text, numbers, or bullet points."
+    app_lang = st.session_state.get("app_lang", "English")
+    sys_prompt = f"Suggest exactly 3 short follow-up questions for the user based on the conversation. Output them strictly on a single line separated by a pipe character `|`. Do not include any intro text, numbers, or bullet points. You must write the questions in {app_lang}."
 
     prediction = st.session_state.get("prediction")
     if prediction and prediction.get("disease"):
@@ -343,7 +348,7 @@ def chatbot_ui():
         fab_container = st.container()
         with fab_container:
             st.markdown('<div class="chat-fab-marker"></div>', unsafe_allow_html=True)
-            if st.button("Open Chat", key="open_chat", help="Open Plantexa AI chat"):
+            if st.button(_t("Open Chat"), key="open_chat", help=_t("Open Plantexa AI chat")):
                 st.session_state.chat_open = True
                 st.rerun()
         return
@@ -355,7 +360,7 @@ def chatbot_ui():
 
         col_title, col_download, col_clear, col_close = st.columns([5, 1, 1, 1])
         with col_title:
-            st.html('<div class="chat-title" style="margin-top: 8px;" title="Double-click and hold to drag panel"><i class="fa-solid fa-robot"></i> Plantexa AI Assistant</div>')
+            st.html(f'<div class="chat-title" style="margin-top: 8px;" title="{_t("Double-click and hold to drag panel")}"><i class="fa-solid fa-robot"></i> {_t("Plantexa AI Assistant")}</div>')
         with col_download:
             # Download chat history
             st.markdown('<div class="chat-btn-download-marker"></div>', unsafe_allow_html=True)
@@ -369,34 +374,34 @@ def chatbot_ui():
 
             if pdf_bytes:
                 st.download_button(
-                    label="Download",
+                    label=_t("Download"),
                     data=pdf_bytes,
                     file_name=pdf_filename,
                     mime="application/pdf",
                     key="download_chat",
-                    help="Download chat as PDF",
+                    help=_t("Download chat as PDF"),
                     use_container_width=False,
                 )
             else:
                 st.download_button(
-                    label="Download",
-                    data="Please run `pip install reportlab` in your terminal to enable PDF downloads.",
+                    label=_t("Download"),
+                    data=_t("Please run `pip install reportlab` in your terminal to enable PDF downloads."),
                     file_name="download_error.txt",
                     mime="text/plain",
                     key="download_chat",
-                    help="ReportLab is required for PDF downloads",
+                    help=_t("ReportLab is required for PDF downloads"),
                     use_container_width=False,
                 )
         with col_clear:
             # Clear chat history
             st.markdown('<div class="chat-btn-clear-marker"></div>', unsafe_allow_html=True)
-            if st.button("Clear", key="clear_chat", help="Clear chat", use_container_width=False):
+            if st.button(_t("Clear"), key="clear_chat", help=_t("Clear chat"), use_container_width=False):
                 reset_chat()
                 st.rerun()
         with col_close:
             # Close chat panel
             st.markdown('<div class="chat-btn-close-marker"></div>', unsafe_allow_html=True)
-            if st.button("Close", key="close_chat", help="Close chat", use_container_width=False):
+            if st.button(_t("Close"), key="close_chat", help=_t("Close chat"), use_container_width=False):
                 st.session_state.chat_open = False
                 st.rerun()
 
@@ -422,13 +427,13 @@ def chatbot_ui():
             col_input, col_send = st.columns([5, 1])
             with col_input:
                 prompt = st.text_input(
-                    "Message",
-                    placeholder="Ask about leaf disease treatment...",
+                    _t("Message"),
+                    placeholder=_t("Ask about leaf disease treatment..."),
                     label_visibility="collapsed",
                 )
             with col_send:
                 st.markdown('<div class="chat-btn-send-marker"></div>', unsafe_allow_html=True)
-                submitted = st.form_submit_button("Send", use_container_width=True)
+                submitted = st.form_submit_button(_t("Send"), use_container_width=True)
 
         final_prompt = selected_followup or (prompt.strip() if submitted else None)
 

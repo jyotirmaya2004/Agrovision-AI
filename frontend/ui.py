@@ -22,6 +22,7 @@ from frontend.sections import (
     render_upload_section,
 )
 from frontend.styles import load_css
+from backend.disease_info import _t
 
 load_dotenv()
 
@@ -58,6 +59,19 @@ def _handle_query_params():
         if action in ["login", "logout"]:
             st.rerun()
 
+    lang = st.query_params.get("lang")
+    if lang:
+        lang_map = {
+            "en": "English",
+            "hi": "Hindi (हिंदी)",
+            "or": "Odia (ଓଡ଼ିଆ)"
+        }
+        if lang in lang_map:
+            st.session_state.app_lang = lang_map[lang]
+            st.session_state.lang_code = lang
+        if "lang" in st.query_params:
+            del st.query_params["lang"]
+        st.rerun()
 
 def render_navbar(current_page: str = "Home"):
     # Ensure auth/session is restored as early as possible on every rerun
@@ -118,26 +132,22 @@ def render_navbar(current_page: str = "Home"):
         saved_username = st.context.cookies.get("plantexa_user")
         if saved_username:
             try:
-                from supabase import create_client
-                supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
-                supabase_key = os.getenv("SUPABASE_KEY")
-                if supabase_key:
-                    supabase = create_client(supabase_url, supabase_key)
-                    response = supabase.table("app_users").select("id, avatar").eq("username", saved_username).limit(1).execute()
-                    if response.data:
-                        st.session_state.username = saved_username
-                        st.session_state.user_id = response.data[0].get("id")
-                        st.session_state.avatar = response.data[0].get("avatar") or "🧑‍🌾"
-                        st.session_state.last_activity = time.time()
+                from backend.db import get_user_by_username
+                user_data = get_user_by_username(saved_username)
+                if user_data:
+                    st.session_state.username = saved_username
+                    st.session_state.user_id = user_data.get("id")
+                    st.session_state.avatar = user_data.get("avatar") or "🧑‍🌾"
+                    st.session_state.last_activity = time.time()
             except Exception:
                 pass
 
 
     is_logged_in = bool(st.session_state.get("username"))
     if not is_logged_in:
-        mobile_auth_link = '<a href="/?action=login" class="nav-link mobile-nav-link" style="color: #22C55E; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 16px;"><i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i> Get Started</a>'
+        mobile_auth_link = f'<a href="?action=login" class="nav-link mobile-nav-link" style="color: #22C55E; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 16px;"><i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i> {_t("Get Started")}</a>'
     else:
-        mobile_auth_link = f'<a href="/?action=logout" class="nav-link mobile-nav-link" style="color: #ef4444; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 16px;"><i class="fa-solid fa-right-from-bracket" style="margin-right: 8px;"></i> Logout ({st.session_state.get("username", "User")})</a>'
+        mobile_auth_link = f'<a href="?action=logout" class="nav-link mobile-nav-link" style="color: #ef4444; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; padding-top: 16px;"><i class="fa-solid fa-right-from-bracket" style="margin-right: 8px;"></i> {_t("Logout")} ({st.session_state.get("username", "User")})</a>'
 
     nav_container = st.container()
     with nav_container:
@@ -173,6 +183,9 @@ def render_navbar(current_page: str = "Home"):
         setInterval(hideChrome, 1000);
         """.replace('\n', ' ')
 
+        curr_lang = st.session_state.get('lang_code', 'en')
+        check_icon = '<i class="fa-solid fa-check" style="margin-left: auto;"></i>'
+
         st.html(f"""
         <input type="checkbox" id="mobile-menu-toggle" class="mobile-menu-toggle">
         <div class="nav-background"></div>
@@ -188,12 +201,23 @@ def render_navbar(current_page: str = "Home"):
 
             <div class="nav-right">
                 <div class="nav-links" role="navigation" aria-label="Primary">
-                    <a href="/" class="nav-link{' active' if current_page == 'Home' else ''}">Home</a>
-                    <a href="/?action=dataset" class="nav-link">Dataset</a>
-                    <a href="/?action=history" class="nav-link">History</a>
-                    <a href="/?action=profile" class="nav-link">Profile</a>
-                    <a href="/?action=about" class="nav-link">About</a>
-                    <a href="/?action=admin" class="nav-link">Admin</a>
+                    <a href="/" class="nav-link{' active' if current_page == 'Home' else ''}">{_t('Home')}</a>
+                    <a href="?action=dataset" class="nav-link">{_t('Dataset')}</a>
+                    <a href="?action=history" class="nav-link">{_t('History')}</a>
+                    <a href="?action=profile" class="nav-link">{_t('Profile')}</a>
+                    <a href="?action=about" class="nav-link">{_t('About')}</a>
+                    <a href="?action=admin" class="nav-link">{_t('Admin')}</a>
+                </div>
+
+                <div class="lang-dropdown-container desktop-lang-toggle">
+                    <div class="lang-btn">
+                        <i class="fa-solid fa-globe"></i> {_t('Lang')} <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
+                    </div>
+                    <div class="lang-dropdown-content">
+                        <a href="?lang=en" class="lang-dropdown-item{' active-lang' if curr_lang == 'en' else ''}">English {check_icon if curr_lang == 'en' else ''}</a>
+                        <a href="?lang=hi" class="lang-dropdown-item{' active-lang' if curr_lang == 'hi' else ''}">Hindi (हिंदी) {check_icon if curr_lang == 'hi' else ''}</a>
+                        <a href="?lang=or" class="lang-dropdown-item{' active-lang' if curr_lang == 'or' else ''}">Odia (ଓଡ଼ିଆ) {check_icon if curr_lang == 'or' else ''}</a>
+                    </div>
                 </div>
 
                 <div class="nav-cta-slot" aria-hidden="true"></div>
@@ -208,12 +232,21 @@ def render_navbar(current_page: str = "Home"):
 
         <div class="mobile-dropdown" role="dialog" aria-label="Mobile navigation">
             <div class="mobile-nav-links">
-                <a href="/" class="nav-link mobile-nav-link{' active' if current_page == 'Home' else ''}"><i class="fa-solid fa-house" style="margin-right: 8px;"></i> Home</a>
-                <a href="/?action=dataset" class="nav-link mobile-nav-link"><i class="fa-solid fa-database" style="margin-right: 8px;"></i> Dataset</a>
-                <a href="/?action=history" class="nav-link mobile-nav-link"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 8px;"></i> History</a>
-                <a href="/?action=profile" class="nav-link mobile-nav-link"><i class="fa-solid fa-user" style="margin-right: 8px;"></i> Profile</a>
-                <a href="/?action=about" class="nav-link mobile-nav-link"><i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> About</a>
-                <a href="/?action=admin" class="nav-link mobile-nav-link"><i class="fa-solid fa-lock" style="margin-right: 8px;"></i> Admin</a>
+                <a href="/" class="nav-link mobile-nav-link{' active' if current_page == 'Home' else ''}"><i class="fa-solid fa-house" style="margin-right: 8px;"></i> {_t('Home')}</a>
+                <a href="?action=dataset" class="nav-link mobile-nav-link"><i class="fa-solid fa-database" style="margin-right: 8px;"></i> {_t('Dataset')}</a>
+                <a href="?action=history" class="nav-link mobile-nav-link"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 8px;"></i> {_t('History')}</a>
+                <a href="?action=profile" class="nav-link mobile-nav-link"><i class="fa-solid fa-user" style="margin-right: 8px;"></i> {_t('Profile')}</a>
+                <a href="?action=about" class="nav-link mobile-nav-link"><i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> {_t('About')}</a>
+                <a href="?action=admin" class="nav-link mobile-nav-link"><i class="fa-solid fa-lock" style="margin-right: 8px;"></i> {_t('Admin')}</a>
+
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 4px 0;"></div>
+                <div style="padding: 4px 14px 0; font-size: 13px; color: var(--leaf-muted); font-weight: 600; text-transform: uppercase;">{_t('Language')}</div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <a href="?lang=en" class="nav-link mobile-nav-link" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 15px; {'background: rgba(34,197,94,0.15); color: #22C55E;' if st.session_state.get('lang_code', 'en') == 'en' else ''}"><span>English</span>{check_icon if st.session_state.get('lang_code', 'en') == 'en' else ''}</a>
+                    <a href="?lang=hi" class="nav-link mobile-nav-link" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 15px; {'background: rgba(34,197,94,0.15); color: #22C55E;' if st.session_state.get('lang_code') == 'hi' else ''}"><span>Hindi (हिंदी)</span>{check_icon if st.session_state.get('lang_code') == 'hi' else ''}</a>
+                    <a href="?lang=or" class="nav-link mobile-nav-link" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 15px; {'background: rgba(34,197,94,0.15); color: #22C55E;' if st.session_state.get('lang_code') == 'or' else ''}"><span>Odia (ଓଡ଼ିଆ)</span>{check_icon if st.session_state.get('lang_code') == 'or' else ''}</a>
+                </div>
+
                 {mobile_auth_link}
             </div>
         </div>
@@ -261,25 +294,15 @@ def restore_session_if_needed():
         saved_username = st.context.cookies.get("plantexa_user")
         if saved_username:
             try:
-                from supabase import create_client
-                supabase_url = os.getenv("SUPABASE_URL", "https://dloxbfflvfcciczfibxh.supabase.co")
-                supabase_key = os.getenv("SUPABASE_KEY")
-                if supabase_key:
-                    supabase = create_client(supabase_url, supabase_key)
-                    response = (
-                        supabase.table("app_users")
-                        .select("id, avatar")
-                        .eq("username", saved_username)
-                        .limit(1)
-                        .execute()
-                    )
-                    if response.data:
-                        st.session_state.username = saved_username
-                        st.session_state.user_id = response.data[0].get("id")
-                        st.session_state.avatar = response.data[0].get("avatar") or "🧑‍🌾"
-                        st.session_state.last_activity = time.time()
-                        st.session_state._restored_session_once = True
-                        return
+                from backend.db import get_user_by_username
+                user_data = get_user_by_username(saved_username)
+                if user_data:
+                    st.session_state.username = saved_username
+                    st.session_state.user_id = user_data.get("id")
+                    st.session_state.avatar = user_data.get("avatar") or "🧑‍🌾"
+                    st.session_state.last_activity = time.time()
+                    st.session_state._restored_session_once = True
+                    return
             except Exception:
                 pass
 
@@ -346,7 +369,13 @@ def require_username(force=False):
 
 
 def main(active_tab: str = "all"):
+    if "app_lang" not in st.session_state:
+        st.session_state.app_lang = "English"
+    if "lang_code" not in st.session_state:
+        st.session_state.lang_code = "en"
+
     load_css()
+
     render_navbar("Home")
     require_username()
     render_header()

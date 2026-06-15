@@ -112,6 +112,31 @@ def _normalize_probabilities(raw_predictions: np.ndarray) -> np.ndarray:
     return exp_values / exp_total
 
 
+def _get_last_conv_layer(model):
+    for layer in reversed(model.layers):
+        if isinstance(layer, tf.keras.layers.Conv2D):
+            return layer.name
+    return None
+
+
+def _make_gradcam_heatmap(img_array, model, last_conv_layer_name, pred_index):
+    grad_model = tf.keras.models.Model(
+        [model.inputs], [model.get_layer(last_conv_layer_name).output, model.output]
+    )
+    with tf.GradientTape() as tape:
+        last_conv_layer_output, preds = grad_model(img_array)
+        class_channel = preds[:, pred_index]
+    grads = tape.gradient(class_channel, last_conv_layer_output)
+    pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
+    last_conv_layer_output = last_conv_layer_output[0]
+    heatmap = last_conv_layer_output @ pooled_grads[..., tf.newaxis]
+    heatmap = tf.squeeze(heatmap)
+    max_val = tf.math.reduce_max(heatmap)
+    if max_val == 0:
+        return heatmap.numpy()
+    return (tf.maximum(heatmap, 0) / max_val).numpy()
+
+
 def _predict_disease(base_image: Image.Image, top_k: int) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     try:
         disease_model = load_disease_model()
@@ -150,6 +175,34 @@ def _predict_disease(base_image: Image.Image, top_k: int) -> tuple[list[dict[str
         }
         for idx in top_indices
     ]
+
+    try:
+        import matplotlib as mpl
+        import base64
+        from io import BytesIO
+
+        last_conv_layer_name = _get_last_conv_layer(disease_model)
+        if last_conv_layer_name:
+            heatmap = _make_gradcam_heatmap(disease_input, disease_model, last_conv_layer_name, pred_index=top_indices[0])
+
+            jet = mpl.colormaps["jet"] if hasattr(mpl, "colormaps") else mpl.cm.get_cmap("jet")
+            jet_colors = jet(np.arange(256))[:, :3]
+            heatmap_idx = np.uint8(255 * heatmap)
+            jet_heatmap = jet_colors[heatmap_idx]
+
+            jet_heatmap = tf.keras.utils.array_to_img(jet_heatmap)
+            jet_heatmap = jet_heatmap.resize((base_image.width, base_image.height))
+            jet_heatmap = tf.keras.utils.img_to_array(jet_heatmap)
+
+            superimposed_img = jet_heatmap * 0.4 + np.array(base_image) * 0.6
+            superimposed_img = np.clip(superimposed_img, 0, 255).astype("uint8")
+            gradcam_img = Image.fromarray(superimposed_img)
+
+            buffered = BytesIO()
+            gradcam_img.save(buffered, format="JPEG")
+            top_predictions[0]["gradcam_b64"] = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    except Exception as e:
+        print(f"Grad-CAM generation skipped (ensure matplotlib is installed): {e}")
 
     return top_predictions, top_predictions[0]
 
@@ -250,4 +303,5 @@ def predict_two_stage(image_source: str | Path | bytes | BinaryIO | Image.Image,
         "confidence": best["confidence"],
         "top_predictions": top_predictions,
         "validation_warning": validation_warning,
+        "gradcam_b64": best.get("gradcam_b64"),
     }
