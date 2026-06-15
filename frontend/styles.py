@@ -1064,12 +1064,16 @@ def load_css():
         }
 
         div[data-testid="stDialog"] {
-            background: rgba(255, 255, 255, 0.03) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            border: 1px solid rgba(34, 197, 94, 0.3) !important;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(34, 197, 94, 0.04) 40%, rgba(2, 6, 23, 0.6) 100%) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-top-color: rgba(255, 255, 255, 0.25) !important;
+            border-left-color: rgba(255, 255, 255, 0.15) !important;
+            border-bottom-color: rgba(34, 197, 94, 0.4) !important;
+            border-right-color: rgba(34, 197, 94, 0.2) !important;
             border-radius: 24px !important;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
             overflow-y: auto !important;
             overflow-x: hidden !important;
             animation: dialogPop 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;

@@ -3,7 +3,8 @@ import streamlit as st
 
 from frontend.components import page_header, section_title, empty_placeholder
 from frontend.styles import load_css
-from frontend.ui import load_history, clear_history, _generate_history_pdf, require_username, render_navbar
+from frontend.ui import require_username, render_navbar
+from frontend.sections import load_history, clear_history, _generate_history_pdf
 from frontend.chatbot import chatbot_ui
 
 
