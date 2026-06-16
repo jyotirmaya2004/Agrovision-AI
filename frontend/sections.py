@@ -70,7 +70,7 @@ def render_header():
 
 
 def render_upload_section():
-    section_title("Image Input", "fa-cloud-arrow-up", anchor_id="diagnosis-section")
+    section_title(_t("Image Input"), "fa-cloud-arrow-up", anchor_id="diagnosis-section")
 
     col_input, col_preview = st.columns([1.3, 1], gap="large")
 
@@ -97,11 +97,11 @@ def render_upload_section():
     with col_preview:
         st.subheader(_t("Analysis Readiness"))
         if image_file:
-            st.image(image_file, caption="Ready for analysis", use_container_width=True)
+            st.image(image_file, caption=_t("Ready for analysis"), use_container_width=True)
             size_mb = len(image_file.getvalue()) / (1024 * 1024)
             st.caption(f"**{_t('Status')}:** {_t('Valid File')} | **{_t('File Size')}:** {size_mb:.2f} MB")
         else:
-            empty_placeholder("fa-image", "No Image Selected", "Your selected image will appear here.")
+            empty_placeholder("fa-image", _t("No Image Selected"), _t("Your selected image will appear here."))
 
     return image_file
 
@@ -376,13 +376,13 @@ def _generate_history_pdf(history_data):
 
 
 def render_prediction_section(image_file):
-    section_title("Diagnosis Dashboard", "fa-chart-pie")
+    section_title(_t("Diagnosis Dashboard"), "fa-chart-pie")
 
-    with st.expander("Debug: leaf vs non-leaf output", expanded=False):
-        show_debug = st.checkbox("Show raw leaf validation output", value=False)
+    with st.expander(_t("Debug: leaf vs non-leaf output"), expanded=False):
+        show_debug = st.checkbox(_t("Show raw leaf validation output"), value=False)
 
     if image_file is None:
-        empty_placeholder("fa-microscope", "Awaiting Image", "Please upload or capture an image above to start analysis.")
+        empty_placeholder("fa-microscope", _t("Awaiting Image"), _t("Please upload or capture an image above to start analysis."))
         return
 
     st.markdown('<div class="analyze-btn-marker"></div><div class="analyze-btn-spacer"></div>', unsafe_allow_html=True)
@@ -394,8 +394,8 @@ def render_prediction_section(image_file):
             st.session_state.show_auth = True
             st.rerun()
 
-        with st.status("Analyzing Leaf Image...", expanded=True) as status:
-            st.write("☁️ Uploading image to Supabase...")
+        with st.status(_t("Analyzing Leaf Image..."), expanded=True) as status:
+            st.write(_t("☁️ Uploading image to Supabase..."))
             image_url = None
             try:
                 from backend.db import upload_image
@@ -408,16 +408,16 @@ def render_prediction_section(image_file):
             except Exception as e:
                 error_msg = str(e).lower()
                 if "policy" in error_msg or "row-level security" in error_msg or "unauthorized" in error_msg:
-                    st.warning("⚠️ Image upload blocked by Supabase policy restrictions. Please check your storage bucket permissions.")
+                    st.warning(_t("⚠️ Image upload blocked by Supabase policy restrictions. Please check your storage bucket permissions."))
                 else:
                     st.warning(f"Could not upload image to Supabase: {e}")
 
             try:
-                st.write("🔍 Extracting image features...")
+                st.write(_t("🔍 Extracting image features..."))
                 time.sleep(0.5)
-                st.write("🌿 Validating leaf presence...")
+                st.write(_t("🌿 Validating leaf presence..."))
                 time.sleep(0.5)
-                st.write("🧬 Running disease classification model...")
+                st.write(_t("🧬 Running disease classification model..."))
                 result = predict_two_stage(image_file, top_k=3)
 
                 st.session_state.prediction = result
@@ -431,7 +431,7 @@ def render_prediction_section(image_file):
                 append_history(new_record)
 
                 st.session_state.prediction_history = load_history()
-                status.update(label="Analysis Complete", state="complete", expanded=False)
+                status.update(label=_t("Analysis Complete"), state="complete", expanded=False)
             except PredictionError as exc:
                 st.session_state.prediction = None
 
@@ -444,7 +444,7 @@ def render_prediction_section(image_file):
                 append_history(new_record)
                 st.session_state.prediction_history = load_history()
 
-                status.update(label="Analysis Failed", state="error", expanded=False)
+                status.update(label=_t("Analysis Failed"), state="error", expanded=False)
                 st.error(str(exc))
             except Exception as exc:
                 st.session_state.prediction = None
@@ -458,7 +458,7 @@ def render_prediction_section(image_file):
                 append_history(new_record)
                 st.session_state.prediction_history = load_history()
 
-                status.update(label="Analysis Failed", state="error", expanded=False)
+                status.update(label=_t("Analysis Failed"), state="error", expanded=False)
                 st.error(f"Unexpected error: {exc}")
 
     result = st.session_state.get("prediction")
@@ -469,7 +469,7 @@ def render_prediction_section(image_file):
     with dashboard_container:
         st.markdown('<div class="dashboard-slide-up-marker"></div>', unsafe_allow_html=True)
 
-        st.success("Analysis Complete!")
+        st.success(_t("Analysis Complete!"))
 
         if result.get("validation_warning"):
             st.warning(result["validation_warning"])
@@ -477,10 +477,10 @@ def render_prediction_section(image_file):
         # Dashboard Row 1
         col_diag, col_top = st.columns([1, 1], gap="large")
         with col_diag:
-            section_title("Diagnosis Result", "fa-virus")
+            section_title(_t("Diagnosis Result"), "fa-virus")
             prediction_card(result["disease"], result["confidence"])
         with col_top:
-            section_title("Alternate Probabilities", "fa-layer-group")
+            section_title(_t("Alternate Probabilities"), "fa-layer-group")
             top_predictions_card([(pred["disease"], pred["confidence"]) for pred in result["top_predictions"]])
 
         if show_debug:
@@ -489,8 +489,8 @@ def render_prediction_section(image_file):
         gradcam_b64 = result.get("gradcam_b64")
         if gradcam_b64:
             st.html("<br>")
-            section_title("Explainable AI (Grad-CAM)", "fa-eye")
-            st.info("This heatmap shows the exact regions of the leaf the neural network focused on to make its diagnosis. Warmer colors (red/orange) indicate higher importance.")
+            section_title(_t("Explainable AI (Grad-CAM)"), "fa-eye")
+            st.info(_t("This heatmap shows the exact regions of the leaf the neural network focused on to make its diagnosis. Warmer colors (red/orange) indicate higher importance."))
             st.html(f"""
             <div style="display: flex; justify-content: center; margin-bottom: 24px;">
                 <div class="glass-card" style="padding: 16px; display: inline-block;">
@@ -500,7 +500,7 @@ def render_prediction_section(image_file):
             """)
 
         st.html("<br>")
-        section_title("Diagnosis & Treatment Hub", "fa-briefcase-medical")
+        section_title(_t("Diagnosis & Treatment Hub"), "fa-briefcase-medical")
 
         raw_disease_info = get_disease_details(result["class_name"])
         selected_code = st.session_state.get("lang_code", "en")
@@ -536,17 +536,17 @@ def render_prediction_section(image_file):
             st.success(_t("Follow these practices to prevent future outbreaks and maintain crop health."))
 
         with tab_comp:
-            st.write("### Disease Comparison")
-            st.write("Comparing current diagnosis against similar pathogens.")
+            st.write(f"### {_t('Disease Comparison')}")
+            st.write(_t("Comparing current diagnosis against similar pathogens."))
             if len(result["top_predictions"]) > 1:
                 alt_disease = result["top_predictions"][1]["disease"]
-                st.warning(f"**Similar Match:** {alt_disease}. Monitor for overlapping symptoms.")
+                st.warning(f"**{_t('Similar Match:')}** {alt_disease}. {_t('Monitor for overlapping symptoms.')}")
             else:
-                st.write("No similar diseases found for comparison.")
+                st.write(_t("No similar diseases found for comparison."))
 
         st.html("<br>")
-        section_title("Diagnosis Report", "fa-file-pdf")
-        st.info("Save a detailed PDF report of this diagnosis, including the uploaded image and treatment guidelines.")
+        section_title(_t("Diagnosis Report"), "fa-file-pdf")
+        st.info(_t("Save a detailed PDF report of this diagnosis, including the uploaded image and treatment guidelines."))
 
         image_bytes = image_file.getvalue() if image_file else None
         # Now that Unicode fonts are supported, we can safely pass the translated disease_info
@@ -555,23 +555,23 @@ def render_prediction_section(image_file):
         if pdf_bytes:
             safe_name = re.sub(r'[^a-zA-Z0-9]+', '_', result['disease']).strip('_').lower()
             if st.download_button(
-                label="Download Full Report Card",
+                label=_t("Download Full Report Card"),
                 data=pdf_bytes,
                 file_name=f"plantexa_report_{safe_name}.pdf",
                 mime="application/pdf",
             ):
-                st.markdown('<div class="success-msg-anim"><i class="fa-solid fa-circle-check"></i> Report downloaded successfully!</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="success-msg-anim"><i class="fa-solid fa-circle-check"></i> {_t("Report downloaded successfully!")}</div>', unsafe_allow_html=True)
         else:
             st.warning("ReportLab is required to generate PDF reports. Please run `pip install reportlab`.")
 
 def render_history_section():
-    section_title("Prediction History", "fa-clock-rotate-left")
+    section_title(_t("Prediction History"), "fa-clock-rotate-left")
 
     history = load_history()
     st.session_state.prediction_history = history
 
     if not history:
-        st.info("No history yet. Analyze a leaf image to see records here.")
+        st.info(_t("No history yet. Analyze a leaf image to see records here."))
         return
 
     import pandas as pd
@@ -591,8 +591,8 @@ def render_history_section():
         styled_df,
         use_container_width=True,
         column_config={
-            "Image_URL": st.column_config.ImageColumn("Uploaded Image"),
-            "Confidence": st.column_config.NumberColumn("Confidence", format="%.2f%%")
+            "Image_URL": st.column_config.ImageColumn(_t("Uploaded Image")),
+            "Confidence": st.column_config.NumberColumn(_t("Confidence"), format="%.2f%%")
         }
     )
 
@@ -602,36 +602,36 @@ def render_history_section():
     if pdf_bytes:
         with col1:
             if st.download_button(
-                label="Download History PDF",
+                label=_t("Download History PDF"),
                 data=pdf_bytes,
                 file_name="plantexa_ai_history.pdf",
                 mime="application/pdf",
                 use_container_width=True,
             ):
-                st.markdown('<div class="success-msg-anim"><i class="fa-solid fa-circle-check"></i> PDF downloaded successfully!</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="success-msg-anim"><i class="fa-solid fa-circle-check"></i> {_t("PDF downloaded successfully!")}</div>', unsafe_allow_html=True)
     with col2:
-        if st.button("Clear History", key="clear_history_home", use_container_width=True):
+        if st.button(_t("Clear History"), key="clear_history_home", use_container_width=True):
             clear_history()
             st.session_state.prediction_history = []
             st.rerun()
 
 
 def render_tips_section():
-    section_title("Quick Care Tips", "fa-lightbulb")
+    section_title(_t("Quick Care Tips"), "fa-lightbulb")
 
     st.html("""
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
         <div class="glass-card staggered-slide-up" style="padding: 20px; border-top: 3px solid #3b82f6; animation-delay: 0s;">
-            <h4 style="margin-top:0; color: #60a5fa; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-droplet"></i> Watering</h4>
-            <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">Water at the base of the plant to prevent leaf wetness and fungal growth.</p>
+            <h4 style="margin-top:0; color: #60a5fa; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-droplet"></i> {_t('Watering')}</h4>
+            <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">{_t('Water at the base of the plant to prevent leaf wetness and fungal growth.')}</p>
         </div>
         <div class="glass-card staggered-slide-up" style="padding: 20px; border-top: 3px solid #eab308; animation-delay: 0.15s;">
-            <h4 style="margin-top:0; color: #fde047; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-sun"></i> Sunlight</h4>
-            <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">Ensure proper canopy pruning to allow UV light to naturally disinfect lower leaves.</p>
+            <h4 style="margin-top:0; color: #fde047; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-sun"></i> {_t('Sunlight')}</h4>
+            <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">{_t('Ensure proper canopy pruning to allow UV light to naturally disinfect lower leaves.')}</p>
         </div>
         <div class="glass-card staggered-slide-up" style="padding: 20px; border-top: 3px solid #a855f7; animation-delay: 0.3s;">
-            <h4 style="margin-top:0; color: #c084fc; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-wind"></i> Airflow</h4>
-            <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">Maintain adequate spacing between crops to reduce humidity and powdery mildew risk.</p>
+            <h4 style="margin-top:0; color: #c084fc; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-wind"></i> {_t('Airflow')}</h4>
+            <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">{_t('Maintain adequate spacing between crops to reduce humidity and powdery mildew risk.')}</p>
         </div>
     </div>
     """)

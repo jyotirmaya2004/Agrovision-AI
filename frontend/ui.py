@@ -92,8 +92,8 @@ def render_navbar(current_page: str = "Home"):
                     <i class="fa-solid fa-seedling"></i>
                 </div>
                 <div>
-                    <h4 style="margin: 0 0 4px 0; font-size: 16px; color: var(--leaf-text); font-family: 'Poppins', sans-serif;">Account Created!</h4>
-                    <p style="margin: 0; color: var(--leaf-muted); font-size: 14px;">Welcome to Plantexa AI, <strong>{username}</strong>.</p>
+                    <h4 style="margin: 0 0 4px 0; font-size: 16px; color: var(--leaf-text); font-family: 'Poppins', sans-serif;">{_t('Account Created!')}</h4>
+                    <p style="margin: 0; color: var(--leaf-muted); font-size: 14px;">{_t('Welcome to Plantexa AI')}, <strong>{username}</strong>.</p>
                 </div>
             </div>
         </div>
@@ -262,7 +262,7 @@ def render_navbar(current_page: str = "Home"):
             # Show a desktop Get Started button. This should NOT affect mobile.
             # (Mobile CSS can hide/ignore .nav-auth-toggle for hamburger layout.)
             if st.button(
-                "Get Started",
+                _t("Get Started"),
                 key="get_started_navbar",
                 use_container_width=True,
             ):
@@ -270,7 +270,7 @@ def render_navbar(current_page: str = "Home"):
                 st.rerun()
         else:
             st.html('<div class="nav-btn-marker logged-in"></div>')
-            if st.button("Logout", key="logout_navbar", use_container_width=True):
+            if st.button(_t("Logout"), key="logout_navbar", use_container_width=True):
                 st.session_state.clear()
                 st.session_state.clear_cookie = True
                 st.rerun()
@@ -357,8 +357,8 @@ def require_username(force=False):
                     <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(34, 197, 94, 0.1); color: var(--leaf-primary); font-size: 28px; margin-bottom: 16px;">
                         <i class="fa-solid fa-lock"></i>
                     </div>
-                    <h1 style="margin: 0 0 12px 0; font-family: 'Poppins', sans-serif; font-size: 32px !important; color: var(--leaf-text);">Authentication Required</h1>
-                    <p style="margin: 0; color: var(--leaf-muted); font-size: 18px; max-width: 600px; margin-left: auto; margin-right: auto;">You must be logged in to access this page. Please use the popup to authenticate.</p>
+                    <h1 style="margin: 0 0 12px 0; font-family: 'Poppins', sans-serif; font-size: 32px !important; color: var(--leaf-text);">{_t('Authentication Required')}</h1>
+                    <p style="margin: 0; color: var(--leaf-muted); font-size: 18px; max-width: 600px; margin-left: auto; margin-right: auto;">{_t('You must be logged in to access this page. Please use the popup to authenticate.')}</p>
                 </div>
                 """
             )

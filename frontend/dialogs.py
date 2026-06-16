@@ -9,7 +9,7 @@ from frontend.components import empty_placeholder, get_confidence_color
 from backend.disease_info import _t
 
 
-@st.dialog("Plantexa AI Secure Login")
+@st.dialog(_t("Plantexa AI Secure Login"))
 def render_auth_dialog():
     if st.session_state.get("logout_reason"):
         st.warning(_t(st.session_state.logout_reason))
@@ -45,7 +45,7 @@ def render_auth_dialog():
                         else:
                             st.error(_t("Username not found. Please create an account."))
                 except Exception as e:
-                    st.error(f"Login failed: {e}")
+                    st.error(f"{_t('Login failed:')} {e}")
             else:
                 st.error(_t("Please enter both username and password."))
 
@@ -121,10 +121,10 @@ def render_auth_dialog():
                     else:
                         st.error(_t("Failed to create new user account."))
             except Exception as e:
-                st.error(f"Registration failed: {e}")
+                st.error(f"{_t('Registration failed:')} {e}")
 
 
-@st.dialog("Prediction History", width="large")
+@st.dialog(_t("Prediction History"), width="large")
 def render_history_dialog():
     from frontend.sections import _generate_history_pdf, clear_history, load_history
 
@@ -177,7 +177,7 @@ def render_history_dialog():
                 st.rerun()
 
 
-@st.dialog("Dataset Information", width="large")
+@st.dialog(_t("Dataset Information"), width="large")
 def render_dataset_dialog():
     st.html(f"""
     <div class="glass-card" style="padding: 24px; height: 100%;">
@@ -213,7 +213,7 @@ def render_dataset_dialog():
     """)
 
 
-@st.dialog("About Plantexa AI", width="large")
+@st.dialog(_t("About Plantexa AI"), width="large")
 def render_about_dialog():
     st.html(f"""
     <div class="glass-card" style="padding: 24px; margin-bottom: 24px;">
@@ -266,7 +266,7 @@ def render_about_dialog():
     """)
 
 
-@st.dialog("Admin - Database Viewer", width="large")
+@st.dialog(_t("Admin - Database Viewer"), width="large")
 def render_admin_dialog():
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 
@@ -299,7 +299,7 @@ def render_admin_dialog():
         df = pd.DataFrame(response.data)
 
         if not df.empty:
-            df["username"] = df["app_users"].apply(lambda x: x.get("username") if isinstance(x, dict) else "Unknown")
+            df["username"] = df["app_users"].apply(lambda x: x.get("username") if isinstance(x, dict) else _t("Unknown"))
             df = df.drop(columns=["app_users"])
             cols = ["id", "username", "timestamp", "disease", "confidence", "image_url", "user_id"]
             df = df[[c for c in cols if c in df.columns]]
@@ -331,10 +331,10 @@ def render_admin_dialog():
                     delete_all_predictions()
                     st.rerun()
     except Exception as e:
-        st.error(f"Could not load database: {e}")
+        st.error(f"{_t('Could not load database:')} {e}")
 
 
-@st.dialog("User Profile", width="large")
+@st.dialog(_t("User Profile"), width="large")
 def render_profile_dialog():
     from frontend.sections import load_history
 
