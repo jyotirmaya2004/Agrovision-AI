@@ -72,36 +72,62 @@ def render_header():
 def render_upload_section():
     section_title(_t("Image Input"), "fa-cloud-arrow-up", anchor_id="diagnosis-section")
 
-    col_input, col_preview = st.columns([1.3, 1], gap="large")
+    st.html(f"""
+    <div style="margin-bottom: 24px; color: var(--leaf-muted); font-size: 16px;">
+        {_t("Select an input method to provide a photo of the affected plant leaf. For best results, ensure the leaf is well-lit and centered.")}
+    </div>
+    """)
+
+    col_input, col_preview = st.columns([1.2, 1], gap="large")
 
     with col_input:
-        st.subheader(_t("Choose Input Method"))
-        default_source = 1 if st.query_params.get("source") == "camera" else 0
-        source_choice = st.radio(
-            _t("Select Input Method"),
-            [_t("Upload from device"), _t("Use camera")],
-            index=default_source,
-            horizontal=True,
-            label_visibility="collapsed"
-        )
+        input_card = st.container(border=True)
+        with input_card:
+            st.html(f"""
+            <h3 style="margin-top: 0; margin-bottom: 16px; color: var(--leaf-text); font-family: 'Poppins', sans-serif; font-size: 18px;">
+                <i class="fa-solid fa-sliders" style="color: var(--leaf-primary); margin-right: 8px;"></i>{_t('Choose Input Method')}
+            </h3>
+            """)
 
-        if source_choice in ["Use camera", _t("Use camera")]:
-            image_file = st.camera_input(_t("Take a clear leaf photo"), label_visibility="collapsed")
-        else:
-            image_file = st.file_uploader(
-                _t("Choose a leaf image"),
-                type=["jpg", "jpeg", "png", "webp", "bmp", "gif", "tiff", "heic", "heif"],
+            default_source = 1 if st.query_params.get("source") == "camera" else 0
+            source_choice = st.radio(
+                _t("Select Input Method"),
+                [_t("Upload from device"), _t("Use camera")],
+                index=default_source,
+                horizontal=True,
                 label_visibility="collapsed"
             )
 
+            st.html("<br>")
+
+            if source_choice in ["Use camera", _t("Use camera")]:
+                image_file = st.camera_input(_t("Take a clear leaf photo"), label_visibility="collapsed")
+            else:
+                image_file = st.file_uploader(
+                    _t("Choose a leaf image"),
+                    type=["jpg", "jpeg", "png", "webp", "bmp", "gif", "tiff", "heic", "heif"],
+                    label_visibility="collapsed"
+                )
+
     with col_preview:
-        st.subheader(_t("Analysis Readiness"))
-        if image_file:
-            st.image(image_file, caption=_t("Ready for analysis"), use_container_width=True)
-            size_mb = len(image_file.getvalue()) / (1024 * 1024)
-            st.caption(f"**{_t('Status')}:** {_t('Valid File')} | **{_t('File Size')}:** {size_mb:.2f} MB")
-        else:
-            empty_placeholder("fa-image", _t("No Image Selected"), _t("Your selected image will appear here."))
+        preview_card = st.container(border=True)
+        with preview_card:
+            st.html(f"""
+            <h3 style="margin-top: 0; margin-bottom: 16px; color: var(--leaf-text); font-family: 'Poppins', sans-serif; font-size: 18px;">
+                <i class="fa-solid fa-microscope" style="color: var(--leaf-primary); margin-right: 8px;"></i>{_t('Analysis Readiness')}
+            </h3>
+            """)
+            if image_file:
+                st.image(image_file, caption=_t("Ready for analysis"), use_container_width=True)
+                size_mb = len(image_file.getvalue()) / (1024 * 1024)
+                st.html(f"""
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; margin-top: 12px; border: 1px solid rgba(34, 197, 94, 0.2);">
+                    <div style="color: var(--leaf-text); font-weight: 600; font-size: 14px;"><i class="fa-solid fa-circle-check" style="color: #22c55e; margin-right: 6px;"></i> {_t('Valid File')}</div>
+                    <div style="color: var(--leaf-muted); font-size: 13px;">{size_mb:.2f} MB</div>
+                </div>
+                """)
+            else:
+                empty_placeholder("fa-image", _t("No Image Selected"), _t("Your selected image will appear here."))
 
     return image_file
 
@@ -619,19 +645,50 @@ def render_history_section():
 def render_tips_section():
     section_title(_t("Quick Care Tips"), "fa-lightbulb")
 
-    st.html("""
+    def _get_local_image_b64(filename):
+        import base64
+        import os
+        path = os.path.join(os.path.dirname(__file__), "..", "assets", filename)
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                ext = filename.split('.')[-1].lower()
+                mime = f"image/{ext}" if ext != 'jpg' else "image/jpeg"
+                return f"data:{mime};base64,{base64.b64encode(f.read()).decode()}"
+        return ""
+
+    img_watering = _get_local_image_b64("watering.jpg") or _get_local_image_b64("watering.png") or _get_local_image_b64("watering.webp")
+    img_sunlight = _get_local_image_b64("sunlight.jpg") or _get_local_image_b64("sunlight.png") or _get_local_image_b64("sunlight.webp")
+    img_airflow = _get_local_image_b64("airflow.jpg") or _get_local_image_b64("airflow.png") or _get_local_image_b64("airflow.webp")
+
+    watering_img_tag = f'<img src="{img_watering}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0.6;">' if img_watering else ''
+    sunlight_img_tag = f'<img src="{img_sunlight}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0.6;">' if img_sunlight else ''
+    airflow_img_tag = f'<img src="{img_airflow}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0.6;">' if img_airflow else ''
+
+    st.html(f"""
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
-        <div class="glass-card staggered-slide-up" style="padding: 20px; border-top: 3px solid #3b82f6; animation-delay: 0s;">
-            <h4 style="margin-top:0; color: #60a5fa; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-droplet"></i> {_t('Watering')}</h4>
-            <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">{_t('Water at the base of the plant to prevent leaf wetness and fungal growth.')}</p>
+        <div class="glass-card staggered-slide-up" style="position: relative; padding: 0; border-top: 3px solid #3b82f6; animation-delay: 0s; overflow: hidden; min-height: 180px; display: flex; align-items: center;">
+            {watering_img_tag}
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(2,6,23,0.95) 0%, rgba(2,6,23,0.7) 65%, transparent 100%); z-index: 1;"></div>
+            <div style="position: relative; z-index: 2; padding: 20px; width: 75%; text-align: left;">
+                <h4 style="margin-top:0; color: #60a5fa; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-droplet"></i> {_t('Watering')}</h4>
+                <p style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 0;">{_t('Water at the base of the plant to prevent leaf wetness and fungal growth.')}</p>
+            </div>
         </div>
-        <div class="glass-card staggered-slide-up" style="padding: 20px; border-top: 3px solid #eab308; animation-delay: 0.15s;">
-            <h4 style="margin-top:0; color: #fde047; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-sun"></i> {_t('Sunlight')}</h4>
-            <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">{_t('Ensure proper canopy pruning to allow UV light to naturally disinfect lower leaves.')}</p>
+        <div class="glass-card staggered-slide-up" style="position: relative; padding: 0; border-top: 3px solid #eab308; animation-delay: 0.15s; overflow: hidden; min-height: 180px; display: flex; align-items: center;">
+            {sunlight_img_tag}
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(2,6,23,0.95) 0%, rgba(2,6,23,0.7) 65%, transparent 100%); z-index: 1;"></div>
+            <div style="position: relative; z-index: 2; padding: 20px; width: 75%; text-align: left;">
+                <h4 style="margin-top:0; color: #fde047; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-sun"></i> {_t('Sunlight')}</h4>
+                <p style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 0;">{_t('Ensure proper canopy pruning to allow UV light to naturally disinfect lower leaves.')}</p>
+            </div>
         </div>
-        <div class="glass-card staggered-slide-up" style="padding: 20px; border-top: 3px solid #a855f7; animation-delay: 0.3s;">
-            <h4 style="margin-top:0; color: #c084fc; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-wind"></i> {_t('Airflow')}</h4>
-            <p style="color: var(--leaf-muted); font-size: 14px; margin-bottom: 0;">{_t('Maintain adequate spacing between crops to reduce humidity and powdery mildew risk.')}</p>
+        <div class="glass-card staggered-slide-up" style="position: relative; padding: 0; border-top: 3px solid #a855f7; animation-delay: 0.3s; overflow: hidden; min-height: 180px; display: flex; align-items: center;">
+            {airflow_img_tag}
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(2,6,23,0.95) 0%, rgba(2,6,23,0.7) 65%, transparent 100%); z-index: 1;"></div>
+            <div style="position: relative; z-index: 2; padding: 20px; width: 75%; text-align: left;">
+                <h4 style="margin-top:0; color: #c084fc; font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-wind"></i> {_t('Airflow')}</h4>
+                <p style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 0;">{_t('Maintain adequate spacing between crops to reduce humidity and powdery mildew risk.')}</p>
+            </div>
         </div>
     </div>
     """)

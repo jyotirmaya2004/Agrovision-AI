@@ -170,7 +170,8 @@
 "Username not found. Please create an account.": "उपयोगकर्ता नाम नहीं मिला। कृपया एक खाता बनाएं।",
 "Please enter both username and password.": "कृपया उपयोगकर्ता नाम और पासवर्ड दोनों दर्ज करें।",
 "Username already exists. Please log in or choose another.": "उपयोगकर्ता नाम पहले से मौजूद है। कृपया लॉग इन करें या दूसरा चुनें।",
-"Failed to create new user account.": "नया उपयोगकर्ता खाता बनाने में विफल।"
+"Failed to create new user account.": "नया उपयोगकर्ता खाता बनाने में विफल।",
+"Select an input method to provide a photo of the affected plant leaf. For best results, ensure the leaf is well-lit and centered.": "प्रभावित पौधे की पत्ती की फोटो प्रदान करने के लिए एक इनपुट विधि चुनें। सर्वोत्तम परिणामों के लिए, सुनिश्चित करें कि पत्ती अच्छी तरह से प्रकाशित और केंद्र में है।"
 },
 
 "or": {
@@ -344,6 +345,7 @@
 "Username not found. Please create an account.": "ଉପଯୋଗକର୍ତ୍ତା ନାମ ମିଳିଲା ନାହିଁ | ଦୟାକରି ଏକ ଆକାଉଣ୍ଟ୍ ସୃଷ୍ଟି କରନ୍ତୁ |",
 "Please enter both username and password.": "ଦୟାକରି ଉଭୟ ଉପଯୋଗକର୍ତ୍ତା ନାମ ଏବଂ ପାସୱାର୍ଡ ଲେଖନ୍ତୁ |",
 "Username already exists. Please log in or choose another.": "ଉପଯୋଗକର୍ତ୍ତା ନାମ ପୂର୍ବରୁ ଅଛି | ଦୟାକରି ଲଗଇନ୍ କରନ୍ତୁ କିମ୍ବା ଅନ୍ୟଟି ବାଛନ୍ତୁ |",
-"Failed to create new user account.": "ନୂତନ ଉପଯୋଗକର୍ତ୍ତା ଆକାଉଣ୍ଟ୍ ସୃଷ୍ଟି କରିବାରେ ବିଫଳ ହେଲା |"
+"Failed to create new user account.": "ନୂତନ ଉପଯୋଗକର୍ତ୍ତା ଆକାଉଣ୍ଟ୍ ସୃଷ୍ଟି କରିବାରେ ବିଫଳ ହେଲା |",
+"Select an input method to provide a photo of the affected plant leaf. For best results, ensure the leaf is well-lit and centered.": "ପ୍ରଭାବିତ ଉଦ୍ଭିଦ ପତ୍ରର ଫଟୋ ପ୍ରଦାନ କରିବାକୁ ଏକ ଇନପୁଟ୍ ପଦ୍ଧତି ଚୟନ କରନ୍ତୁ | ସର୍ବୋତ୍ତମ ଫଳାଫଳ ପାଇଁ, ନିଶ୍ଚିତ କରନ୍ତୁ ଯେ ପତ୍ରଟି ଭଲ ଆଲୋକିତ ଏବଂ କେନ୍ଦ୍ରୀଭୂତ ଅଟେ |"
 }
 }
