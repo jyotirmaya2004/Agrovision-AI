@@ -716,11 +716,6 @@ def render_team_section():
         return ""
 
     team_members = [
-        {"name": "Jyotirmaya Behera", "id": "3146/24", "role": "AI Engineer", "img_prefix": "jyotirmaya", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
-        {"name": "Diptesh Ranjan Pradhan", "id": "3141/24", "role": "Backend Developer", "img_prefix": "diptesh", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
-        {"name": "Bibekananda Sahoo", "id": "3136/24", "role": "UI/UX Designer", "img_prefix": "bibekananda", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
-        {"name": "Pritam Kumar Behera", "id": "3159/24", "role": "Frontend Developer", "img_prefix": "pritam", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
-        {"name": "Laxman Kumar Sahoo", "id": "3148/24", "role": "Data Scientist", "img_prefix": "laxman", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"}
         {"name": "Jyotirmaya Behera", "id": "3146/24", "role": "AI Engineer", "contribution": "AI Models & Core Logic", "img_prefix": "jyotirmaya", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
         {"name": "Diptesh Ranjan Pradhan", "id": "3141/24", "role": "Backend Developer", "contribution": "Database & Supabase API", "img_prefix": "diptesh", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
         {"name": "Bibekananda Sahoo", "id": "3136/24", "role": "UI/UX Designer", "contribution": "Glassmorphism UI/UX Design", "img_prefix": "bibekananda", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
@@ -755,7 +750,6 @@ def render_team_section():
                 <!-- Back Side -->
                 <div class="team-card-back glass-card">
                     <h4 class="team-name-back">{member['name']}</h4>
-                    <p class="team-role-back">{_t(member.get('role', 'Member'))}</p>
                     <p class="team-role-back">{_t(member.get('contribution', 'Project Member'))}</p>
                     <div class="team-social-links">
                         <a href="{member.get('github', '#')}" target="_blank" class="team-social-btn" title="GitHub"><i class="fa-brands fa-github"></i></a>
@@ -873,8 +867,6 @@ def render_team_section():
         font-weight: 700;
     }}
     .team-role-back {{
-        color: var(--leaf-muted);
-        font-size: 14px;
         color: rgba(255,255,255,0.85);
         font-size: 13px;
         margin-bottom: 24px;
