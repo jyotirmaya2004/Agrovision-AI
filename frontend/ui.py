@@ -20,6 +20,7 @@ from frontend.sections import (
     render_prediction_section,
     render_tips_section,
     render_upload_section,
+    render_team_section,
 )
 from frontend.styles import load_css
 from backend.disease_info import _t
@@ -398,6 +399,8 @@ def main(active_tab: str = "all"):
     render_history_section()
 
     render_tips_section()
+
+    render_team_section()
 
     render_footer()
     chatbot_ui()

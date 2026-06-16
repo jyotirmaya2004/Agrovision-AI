@@ -8,6 +8,7 @@ from openai import OpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from backend.disease_info import _t
+import frontend.components as fc
 
 NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 DEFAULT_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
@@ -353,15 +354,17 @@ def chatbot_ui():
                 st.rerun()
         return
 
-    chat_container = st.container()
-    with chat_container:
-        # Hidden marker to anchor the CSS targeting using the :has() selector
-        st.markdown('<div class="chat-floating-panel-marker"></div>', unsafe_allow_html=True)
-
-        col_title, col_download, col_clear, col_close = st.columns([5, 1, 1, 1])
-        with col_title:
-            st.html(f'<div class="chat-title" style="margin-top: 8px;" title="{_t("Double-click and hold to drag panel")}"><i class="fa-solid fa-robot"></i> {_t("Plantexa AI Assistant")}</div>')
-        with col_download:
+    with fc.render_floating_window(
+        "Plantexa AI Assistant",
+        "fa-robot",
+        "chat",
+        top="auto",
+        left="auto",
+        bottom="150px",
+        right="18px",
+        width="min(420px, calc(100vw - 36px))"
+    ) as (cols, body):
+        with cols[1]:
             # Download chat history
             st.markdown('<div class="chat-btn-download-marker"></div>', unsafe_allow_html=True)
             pdf_bytes = _generate_pdf_transcript(st.session_state.messages)
@@ -392,23 +395,17 @@ def chatbot_ui():
                     help=_t("ReportLab is required for PDF downloads"),
                     use_container_width=False,
                 )
-        with col_clear:
+        with cols[2]:
             # Clear chat history
             st.markdown('<div class="chat-btn-clear-marker"></div>', unsafe_allow_html=True)
             if st.button(_t("Clear"), key="clear_chat", help=_t("Clear chat"), use_container_width=False):
                 reset_chat()
                 st.rerun()
-        with col_close:
-            # Close chat panel
-            st.markdown('<div class="chat-btn-close-marker"></div>', unsafe_allow_html=True)
-            if st.button(_t("Close"), key="close_chat", help=_t("Close chat"), use_container_width=False):
-                st.session_state.chat_open = False
-                st.rerun()
 
-        # Fixed height container handles chat scrolling naturally in Streamlit
-        messages_container = st.container(height=350)
-        with messages_container:
-            _render_message_bubbles()
+        with body:
+            messages_container = st.container(height=350)
+            with messages_container:
+                _render_message_bubbles()
             followups_placeholder = st.container()
 
         selected_followup = None

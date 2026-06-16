@@ -665,7 +665,15 @@ def render_tips_section():
     airflow_img_tag = f'<img src="{img_airflow}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0.6;">' if img_airflow else ''
 
     st.html(f"""
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <style>
+    .tips-grid {{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }}
+    </style>
+    <div class="tips-grid">
         <div class="glass-card staggered-slide-up" style="position: relative; padding: 0; border-top: 3px solid #3b82f6; animation-delay: 0s; overflow: hidden; min-height: 180px; display: flex; align-items: center;">
             {watering_img_tag}
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(2,6,23,0.95) 0%, rgba(2,6,23,0.7) 65%, transparent 100%); z-index: 1;"></div>
@@ -691,6 +699,305 @@ def render_tips_section():
             </div>
         </div>
     </div>
+    """)
+
+def render_team_section():
+    section_title(_t("Meet the Team"), "fa-users")
+
+    def _get_local_image_b64(filename):
+        import base64
+        import os
+        path = os.path.join(os.path.dirname(__file__), "..", "assets", filename)
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                ext = filename.split('.')[-1].lower()
+                mime = f"image/{ext}" if ext != 'jpg' else "image/jpeg"
+                return f"data:{mime};base64,{base64.b64encode(f.read()).decode()}"
+        return ""
+
+    team_members = [
+        {"name": "Jyotirmaya Behera", "id": "3146/24", "role": "AI Engineer", "img_prefix": "jyotirmaya", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
+        {"name": "Diptesh Ranjan Pradhan", "id": "3141/24", "role": "Backend Developer", "img_prefix": "diptesh", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
+        {"name": "Bibekananda Sahoo", "id": "3136/24", "role": "UI/UX Designer", "img_prefix": "bibekananda", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
+        {"name": "Pritam Kumar Behera", "id": "3159/24", "role": "Frontend Developer", "img_prefix": "pritam", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
+        {"name": "Laxman Kumar Sahoo", "id": "3148/24", "role": "Data Scientist", "img_prefix": "laxman", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"}
+        {"name": "Jyotirmaya Behera", "id": "3146/24", "role": "AI Engineer", "contribution": "AI Models & Core Logic", "img_prefix": "jyotirmaya", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
+        {"name": "Diptesh Ranjan Pradhan", "id": "3141/24", "role": "Backend Developer", "contribution": "Database & Supabase API", "img_prefix": "diptesh", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
+        {"name": "Bibekananda Sahoo", "id": "3136/24", "role": "UI/UX Designer", "contribution": "Glassmorphism UI/UX Design", "img_prefix": "bibekananda", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
+        {"name": "Pritam Kumar Behera", "id": "3159/24", "role": "Frontend Developer", "contribution": "Streamlit Frontend & Logic", "img_prefix": "pritam", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
+        {"name": "Laxman Kumar Sahoo", "id": "3148/24", "role": "Data Scientist", "contribution": "Data Collection & Preprocessing", "img_prefix": "laxman", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"}
+    ]
+
+    cards_html = ""
+    for i, member in enumerate(team_members):
+        prefix = member["img_prefix"]
+        img_b64 = _get_local_image_b64(f"{prefix}.jpg") or _get_local_image_b64(f"{prefix}.png") or _get_local_image_b64(f"{prefix}.webp")
+
+        if img_b64:
+            img_tag = f'<img src="{img_b64}" class="team-img">'
+        else:
+            img_tag = f'<div class="team-img fallback-img"><i class="fa-solid fa-user"></i></div>'
+
+        cards_html += f"""
+        <div class="team-card-container staggered-slide-up" style="animation-delay: {i * 0.1}s;">
+            <div class="team-card-inner">
+                <!-- Front Side -->
+                <div class="team-card-front glass-card">
+                    <div class="team-img-wrapper">
+                        {img_tag}
+                    </div>
+                    <div class="team-info-front">
+                        <div class="team-role">{_t(member.get('role', 'Member'))}</div>
+                        <h4 class="team-name">{member['name']}</h4>
+                        <div class="team-id-badge"><i class="fa-solid fa-id-badge"></i> {_t('ID:')} {member['id']}</div>
+                    </div>
+                </div>
+                <!-- Back Side -->
+                <div class="team-card-back glass-card">
+                    <h4 class="team-name-back">{member['name']}</h4>
+                    <p class="team-role-back">{_t(member.get('role', 'Member'))}</p>
+                    <p class="team-role-back">{_t(member.get('contribution', 'Project Member'))}</p>
+                    <div class="team-social-links">
+                        <a href="{member.get('github', '#')}" target="_blank" class="team-social-btn" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                        <a href="{member.get('linkedin', '#')}" target="_blank" class="team-social-btn" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                        <a href="{member.get('instagram', '#')}" target="_blank" class="team-social-btn" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="{member.get('facebook', '#')}" target="_blank" class="team-social-btn" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """
+
+    st.html(f"""
+    <style>
+    .team-card-container {{
+        background-color: transparent;
+        min-width: 240px;
+        flex: 1 0 auto;
+        scroll-snap-align: center;
+        perspective: 1000px;
+        height: 350px;
+    }}
+    .team-card-inner {{
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform-style: preserve-3d;
+    }}
+    .team-card-container:hover .team-card-inner {{
+        transform: rotateY(180deg);
+    }}
+    .team-card-front, .team-card-back {{
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(145deg, rgba(15, 23, 42, 0.6) 0%, rgba(2, 6, 23, 0.8) 100%);
+        border-top: 3px solid var(--leaf-primary);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: all 0.5s ease;
+    }}
+    .team-card-back {{
+        transform: rotateY(180deg);
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+        background: linear-gradient(145deg, rgba(2, 6, 23, 0.9) 0%, rgba(15, 23, 42, 0.8) 100%);
+        border-top: 3px solid var(--leaf-accent);
+    }}
+    .team-card-container:hover .team-card-back {{
+        box-shadow: 0 10px 40px rgba(34, 197, 94, 0.4), inset 0 0 20px rgba(34, 197, 94, 0.1);
+        border-color: var(--leaf-primary);
+    }}
+    .team-img-wrapper {{
+        width: 100%;
+        height: 220px;
+        overflow: hidden;
+        position: relative;
+    }}
+    .team-img {{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: grayscale(10%) contrast(110%);
+        transition: all 0.5s ease;
+    }}
+    .fallback-img {{
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 64px;
+        color: rgba(34, 197, 94, 0.4);
+    }}
+    .team-info-front {{
+        padding: 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }}
+    .team-role {{
+        font-size: 11px;
+        color: var(--leaf-accent);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 6px;
+        background: rgba(34, 197, 94, 0.15);
+        padding: 4px 12px;
+        border-radius: 99px;
+    }}
+    .team-name {{
+        margin: 0 0 6px;
+        color: #ffffff;
+        font-family: 'Poppins', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+    }}
+    .team-name-back {{
+        margin: 0 0 6px;
+        color: #ffffff;
+        font-family: 'Poppins', sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+    }}
+    .team-role-back {{
+        color: var(--leaf-muted);
+        font-size: 14px;
+        color: rgba(255,255,255,0.85);
+        font-size: 13px;
+        margin-bottom: 24px;
+        line-height: 1.5;
+    }}
+    .team-id-badge {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--leaf-muted);
+        font-size: 13px;
+        background: rgba(255,255,255,0.03);
+        padding: 4px 12px;
+        border-radius: 6px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }}
+    .team-social-links {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+    }}
+    .team-social-btn {{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        font-size: 18px;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        text-decoration: none;
+    }}
+    .team-social-btn:hover {{
+        background: var(--leaf-primary);
+        color: #fff;
+        transform: translateY(-5px) scale(1.1);
+        box-shadow: 0 10px 25px rgba(34, 197, 94, 0.4);
+    }}
+    .team-grid {{
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 16px;
+        margin-bottom: 32px;
+        padding-bottom: 16px;
+        scroll-behavior: smooth;
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }}
+    .team-grid::-webkit-scrollbar {{
+        height: 6px;
+    }}
+    .team-grid::-webkit-scrollbar-track {{
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 10px;
+    }}
+    .team-grid::-webkit-scrollbar-thumb {{
+        background-color: rgba(34, 197, 94, 0.3);
+        border-radius: 10px;
+    }}
+    .team-grid::-webkit-scrollbar-thumb:hover {{
+        background-color: rgba(34, 197, 94, 0.7);
+    }}
+    @media (max-width: 768px) {{
+        .team-card-container {{
+            min-width: unset;
+            flex: 0 0 75vw;
+            max-width: 280px;
+        }}
+    }}
+    .carousel-nav:hover {{
+        background: var(--leaf-primary) !important;
+        color: white !important;
+    }}
+    @media (max-width: 768px) {{
+        .carousel-nav {{ display: none !important; }}
+    }}
+    </style>
+    <div style="position: relative;">
+        <button class="carousel-nav" id="team-prev" style="position: absolute; left: -16px; top: calc(50% - 8px); transform: translateY(-50%); z-index: 10; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(34, 197, 94, 0.4); background: rgba(15, 23, 42, 0.9); color: var(--leaf-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"><i class="fa-solid fa-chevron-left"></i></button>
+        <button class="carousel-nav" id="team-next" style="position: absolute; right: -16px; top: calc(50% - 8px); transform: translateY(-50%); z-index: 10; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(34, 197, 94, 0.4); background: rgba(15, 23, 42, 0.9); color: var(--leaf-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="team-grid" id="team-carousel">
+            {cards_html}
+        </div>
+    </div>
+    <script>
+    if (window.teamCarouselInterval) clearInterval(window.teamCarouselInterval);
+    const teamGrid = document.getElementById('team-carousel');
+    if (teamGrid) {{
+        window.teamCarouselInterval = setInterval(() => {{
+            if (teamGrid.scrollWidth > teamGrid.clientWidth) {{
+                const firstCard = teamGrid.querySelector('.team-card-container');
+                if (!firstCard) return;
+                const cardWidth = firstCard.offsetWidth + 16;
+                if (teamGrid.scrollLeft + teamGrid.clientWidth >= teamGrid.scrollWidth - 10) {{
+                    teamGrid.scrollTo({{ left: 0, behavior: 'smooth' }});
+                }} else {{
+                    teamGrid.scrollBy({{ left: cardWidth, behavior: 'smooth' }});
+                }}
+            }}
+        }}, 2500); // <-- Adjust this number (in milliseconds) to change scroll speed
+
+        /* Pause automatic swap when the user touches or interacts with the cards */
+        teamGrid.addEventListener('touchstart', () => clearInterval(window.teamCarouselInterval), {{passive: true}});
+        teamGrid.addEventListener('mousedown', () => clearInterval(window.teamCarouselInterval));
+        teamGrid.addEventListener('mouseenter', () => clearInterval(window.teamCarouselInterval)); // Pause on hover
+
+        document.getElementById('team-prev')?.addEventListener('click', () => {{
+            clearInterval(window.teamCarouselInterval);
+            const firstCard = teamGrid.querySelector('.team-card-container');
+            if (firstCard) teamGrid.scrollBy({{ left: -(firstCard.offsetWidth + 16), behavior: 'smooth' }});
+        }});
+
+        document.getElementById('team-next')?.addEventListener('click', () => {{
+            clearInterval(window.teamCarouselInterval);
+            const firstCard = teamGrid.querySelector('.team-card-container');
+            if (firstCard) teamGrid.scrollBy({{ left: firstCard.offsetWidth + 16, behavior: 'smooth' }});
+        }});
+    }}
+    </script>
     """)
 
 
@@ -740,22 +1047,20 @@ def render_footer():
                 <!-- Column 2: Navigation -->
                 <div class="footer-col">
                     <h4 class="f-heading">{_t('Navigation')}</h4>
-                    <a href="#diagnosis-section" class="f-link">{_t('Home')}</a>
-                    <a href="#diagnosis-section" class="f-link">{_t('Disease Detection')}</a>
-                    <a href="?tab=history" class="f-link">{_t('Prediction History')}</a>
-                    <a href="?tab=history" class="f-link">{_t('Reports')}</a>
-                    <a href="#diagnosis-section" class="f-link">{_t('Dashboard')}</a>
-                    <a href="#diagnosis-section" class="f-link">{_t('Analytics')}</a>
-                    <a href="?tab=chat" class="f-link">{_t('Chat Assistant')}</a>
+                    <a href="/" class="f-link">{_t('Home')}</a>
+                    <a href="/#diagnosis-section" class="f-link">{_t('Disease Detection')}</a>
+                    <a href="?action=history" class="f-link">{_t('Prediction History')}</a>
+                    <a href="?action=profile" class="f-link">{_t('Profile')}</a>
+                    <a href="?action=admin" class="f-link">{_t('Admin')}</a>
                 </div>
 
                 <!-- Column 3: Resources -->
                 <div class="footer-col">
                     <h4 class="f-heading">{_t('Resources')}</h4>
-                    <a href="#" class="f-link">{_t('Documentation')}</a>
+                    <a href="?action=about" class="f-link">{_t('About Plantexa AI')}</a>
+                    <a href="?action=dataset" class="f-link">{_t('Dataset Information')}</a>
                     <a href="#" class="f-link">{_t('User Guide')}</a>
                     <a href="#" class="f-link">FAQ</a>
-                    <a href="#" class="f-link">{_t('API Reference')}</a>
                     <a href="#" class="f-link">{_t('Privacy Policy')}</a>
                     <a href="#" class="f-link">{_t('Terms & Conditions')}</a>
                 </div>

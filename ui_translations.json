@@ -171,7 +171,20 @@
 "Please enter both username and password.": "कृपया उपयोगकर्ता नाम और पासवर्ड दोनों दर्ज करें।",
 "Username already exists. Please log in or choose another.": "उपयोगकर्ता नाम पहले से मौजूद है। कृपया लॉग इन करें या दूसरा चुनें।",
 "Failed to create new user account.": "नया उपयोगकर्ता खाता बनाने में विफल।",
-"Select an input method to provide a photo of the affected plant leaf. For best results, ensure the leaf is well-lit and centered.": "प्रभावित पौधे की पत्ती की फोटो प्रदान करने के लिए एक इनपुट विधि चुनें। सर्वोत्तम परिणामों के लिए, सुनिश्चित करें कि पत्ती अच्छी तरह से प्रकाशित और केंद्र में है।"
+"Select an input method to provide a photo of the affected plant leaf. For best results, ensure the leaf is well-lit and centered.": "प्रभावित पौधे की पत्ती की फोटो प्रदान करने के लिए एक इनपुट विधि चुनें। सर्वोत्तम परिणामों के लिए, सुनिश्चित करें कि पत्ती अच्छी तरह से प्रकाशित और केंद्र में है।",
+"Meet the Team": "टीम से मिलें",
+"ID:": "आईडी:",
+"AI Engineer": "एआई इंजीनियर",
+"Backend Developer": "बैकएंड डेवलपर",
+"UI/UX Designer": "यूआई/यूएक्स डिजाइनर",
+"Frontend Developer": "फ्रंटएंड डेवलपर",
+"Data Scientist": "डेटा साइंटिस्ट",
+"AI Models & Core Logic": "AI मॉडल और कोर लॉजिक",
+"Database & Supabase API": "डेटाबेस और सुपाबेस एपीआई",
+"Glassmorphism UI/UX Design": "ग्लासमॉर्फिज़्म UI/UX डिज़ाइन",
+"Streamlit Frontend & Logic": "स्ट्रीमलिट फ्रंटएंड और लॉजिक",
+"Data Collection & Preprocessing": "डेटा संग्रह और प्रीप्रोसेसिंग",
+"Project Member": "परियोजना सदस्य"
 },
 
 "or": {
@@ -346,6 +359,19 @@
 "Please enter both username and password.": "ଦୟାକରି ଉଭୟ ଉପଯୋଗକର୍ତ୍ତା ନାମ ଏବଂ ପାସୱାର୍ଡ ଲେଖନ୍ତୁ |",
 "Username already exists. Please log in or choose another.": "ଉପଯୋଗକର୍ତ୍ତା ନାମ ପୂର୍ବରୁ ଅଛି | ଦୟାକରି ଲଗଇନ୍ କରନ୍ତୁ କିମ୍ବା ଅନ୍ୟଟି ବାଛନ୍ତୁ |",
 "Failed to create new user account.": "ନୂତନ ଉପଯୋଗକର୍ତ୍ତା ଆକାଉଣ୍ଟ୍ ସୃଷ୍ଟି କରିବାରେ ବିଫଳ ହେଲା |",
-"Select an input method to provide a photo of the affected plant leaf. For best results, ensure the leaf is well-lit and centered.": "ପ୍ରଭାବିତ ଉଦ୍ଭିଦ ପତ୍ରର ଫଟୋ ପ୍ରଦାନ କରିବାକୁ ଏକ ଇନପୁଟ୍ ପଦ୍ଧତି ଚୟନ କରନ୍ତୁ | ସର୍ବୋତ୍ତମ ଫଳାଫଳ ପାଇଁ, ନିଶ୍ଚିତ କରନ୍ତୁ ଯେ ପତ୍ରଟି ଭଲ ଆଲୋକିତ ଏବଂ କେନ୍ଦ୍ରୀଭୂତ ଅଟେ |"
+"Select an input method to provide a photo of the affected plant leaf. For best results, ensure the leaf is well-lit and centered.": "ପ୍ରଭାବିତ ଉଦ୍ଭିଦ ପତ୍ରର ଫଟୋ ପ୍ରଦାନ କରିବାକୁ ଏକ ଇନପୁଟ୍ ପଦ୍ଧତି ଚୟନ କରନ୍ତୁ | ସର୍ବୋତ୍ତମ ଫଳାଫଳ ପାଇଁ, ନିଶ୍ଚିତ କରନ୍ତୁ ଯେ ପତ୍ରଟି ଭଲ ଆଲୋକିତ ଏବଂ କେନ୍ଦ୍ରୀଭୂତ ଅଟେ |",
+"Meet the Team": "ଦଳକୁ ଭେଟନ୍ତୁ",
+"ID:": "ID:",
+"AI Engineer": "AI ଇଞ୍ଜିନିୟର",
+"Backend Developer": "ବ୍ୟାକଏଣ୍ଡ ଡେଭଲପର",
+"UI/UX Designer": "UI/UX ଡିଜାଇନର",
+"Frontend Developer": "ଫ୍ରଣ୍ଟଏଣ୍ଡ ଡେଭଲପର",
+"Data Scientist": "ଡାଟା ସାଇଣ୍ଟିଷ୍ଟ",
+"AI Models & Core Logic": "AI ମଡେଲ୍ ଏବଂ ମୂଳ ଲଜିକ୍",
+"Database & Supabase API": "ଡାଟାବେସ୍ ଏବଂ ସୁପାବେସ୍ API",
+"Glassmorphism UI/UX Design": "ଗ୍ଲାସମର୍ଫିଜମ୍ UI/UX ଡିଜାଇନ୍",
+"Streamlit Frontend & Logic": "Streamlit ଫ୍ରଣ୍ଟଏଣ୍ଡ୍ ଏବଂ ଲଜିକ୍",
+"Data Collection & Preprocessing": "ଡାଟା ସଂଗ୍ରହ ଏବଂ ପ୍ରିପ୍ରୋସେସିଂ",
+"Project Member": "ପ୍ରକଳ୍ପ ସଦସ୍ୟ"
 }
 }

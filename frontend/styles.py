@@ -328,17 +328,19 @@ def load_css():
 
         /* --- Modern Glassmorphism Cards --- */
         .glass-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            box-shadow: var(--leaf-shadow);
-            transition: all 0.3s ease;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         .glass-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(34, 197, 94, 0.15);
+            transform: translateY(-6px);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4), 0 0 20px rgba(34, 197, 94, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
             border-color: rgba(34, 197, 94, 0.3);
         }
 
