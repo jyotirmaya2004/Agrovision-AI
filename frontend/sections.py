@@ -46,7 +46,7 @@ def load_history():
     try:
         return _fetch_history_cached(user_id)
     except Exception as e:
-        st.warning(f"Could not load history from Supabase: {e}")
+        st.warning(f"Could not load history from database: {e}")
     return []
 
 def append_history(item):
@@ -65,7 +65,7 @@ def append_history(item):
         insert_history_record(record)
         _fetch_history_cached.clear()
     except Exception as e:
-        st.warning(f"Could not save history to Supabase: {e}")
+        st.warning(f"Could not save history to database: {e}")
 
 def clear_history():
     user_id = st.session_state.get("user_id")
@@ -434,7 +434,7 @@ def render_prediction_section(image_file):
             st.rerun()
 
         with st.status(_t("Analyzing Leaf Image..."), expanded=True) as status:
-            st.write(_t("☁️ Uploading image to Supabase..."))
+            st.write(_t("☁️ Uploading image..."))
             image_url = None
             try:
                 from backend.db import upload_image
@@ -447,9 +447,9 @@ def render_prediction_section(image_file):
             except Exception as e:
                 error_msg = str(e).lower()
                 if "policy" in error_msg or "row-level security" in error_msg or "unauthorized" in error_msg:
-                    st.warning(_t("⚠️ Image upload blocked by Supabase policy restrictions. Please check your storage bucket permissions."))
+                    st.warning(_t("⚠️ Image upload blocked by policy restrictions. Please check your storage bucket permissions."))
                 else:
-                    st.warning(f"Could not upload image to Supabase: {e}")
+                    st.warning(f"Could not upload image: {e}")
 
             try:
                 st.write(_t("🔍 Extracting image features..."))

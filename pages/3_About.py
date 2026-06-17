@@ -123,6 +123,8 @@ def _generate_about_pdf():
         from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle, Image as RLImage
         from reportlab.lib import colors
         from reportlab.lib.units import inch
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
     except ImportError:
         return None
 
@@ -133,9 +135,21 @@ def _generate_about_pdf():
     )
     styles = getSampleStyleSheet()
 
+    base_font = "Helvetica"
+    font_path = os.path.join(os.path.dirname(__file__), "..", "assets", "fonts", "UnicodeFont.ttf")
+    if os.path.exists(font_path):
+        try:
+            pdfmetrics.registerFont(TTFont('UnicodeFont', font_path))
+            base_font = 'UnicodeFont'
+        except Exception:
+            pass
+
+    styles.add(ParagraphStyle(name='CustomNormal', parent=styles['Normal'], fontName=base_font, fontSize=11, leading=15))
+
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Title'],
+        fontName=base_font,
         fontSize=22,
         textColor=colors.HexColor('#1b4332'),
         spaceAfter=20
@@ -144,6 +158,7 @@ def _generate_about_pdf():
     h2_style = ParagraphStyle(
         'CustomH2',
         parent=styles['Heading2'],
+        fontName=base_font,
         fontSize=14,
         textColor=colors.HexColor('#2d6a4f'),
         spaceBefore=12,
@@ -155,11 +170,11 @@ def _generate_about_pdf():
     story.append(Spacer(1, 10))
 
     story.append(Paragraph("<b>Project Overview</b>", h2_style))
-    story.append(Paragraph("Plantexa AI uses a two-stage deep learning workflow. It first checks whether the uploaded image looks like a plant leaf, then predicts the most likely disease and shows symptoms, causes, treatment, and prevention guidance from the disease knowledge base.", styles["Normal"]))
+    story.append(Paragraph("Plantexa AI uses a two-stage deep learning workflow. It first checks whether the uploaded image looks like a plant leaf, then predicts the most likely disease and shows symptoms, causes, treatment, and prevention guidance from the disease knowledge base.", styles["CustomNormal"]))
     story.append(Spacer(1, 10))
 
     story.append(Paragraph("<b>Features</b>", h2_style))
-    story.append(Paragraph("• Two-Stage Pipeline: Leaf detection before disease classification<br/>• AI Analysis: Top 3 predictions with real-time confidence scores<br/>• Knowledge Base: Detailed disease symptoms, causes, treatment, and prevention<br/>• NVIDIA LLM: Context-aware AI agriculture assistant<br/>• Reporting: Downloadable PDF report cards and session prediction history", styles["Normal"]))
+    story.append(Paragraph("• Two-Stage Pipeline: Leaf detection before disease classification<br/>• AI Analysis: Top 3 predictions with real-time confidence scores<br/>• Knowledge Base: Detailed disease symptoms, causes, treatment, and prevention<br/>• NVIDIA LLM: Context-aware AI agriculture assistant<br/>• Reporting: Downloadable PDF report cards and session prediction history", styles["CustomNormal"]))
     story.append(Spacer(1, 10))
 
     story.append(Paragraph("<b>Meet the Team</b>", h2_style))
@@ -196,11 +211,11 @@ def _generate_about_pdf():
                 rl_img = RLImage(clean_img_io, width=img_width * ratio, height=img_height * ratio)
                 row_data.append(rl_img)
             except Exception:
-                row_data.append(Paragraph("No Image", styles["Normal"]))
+                row_data.append(Paragraph("No Image", styles["CustomNormal"]))
         else:
-            row_data.append(Paragraph("No Image", styles["Normal"]))
+            row_data.append(Paragraph("No Image", styles["CustomNormal"]))
 
-        row_data.append(Paragraph(member_info, styles["Normal"]))
+        row_data.append(Paragraph(member_info, styles["CustomNormal"]))
 
         t = Table([row_data], colWidths=[1.5*inch, 4.5*inch])
         t.setStyle(TableStyle([
@@ -212,7 +227,7 @@ def _generate_about_pdf():
 
     def add_footer(canvas, doc):
         canvas.saveState()
-        canvas.setFont('Helvetica', 9)
+        canvas.setFont(base_font, 9)
         canvas.setFillColor(colors.dimgrey)
         footer_text = f"Plantexa AI About - Page {doc.page}"
         canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, footer_text)

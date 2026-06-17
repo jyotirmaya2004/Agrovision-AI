@@ -75,11 +75,15 @@ st.html(
 
 def _generate_dataset_pdf():
     try:
+        import os
+        import json
         from reportlab.lib.pagesizes import letter
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
         from reportlab.lib import colors
         from reportlab.lib.units import inch
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
     except ImportError:
         return None
 
@@ -90,9 +94,40 @@ def _generate_dataset_pdf():
     )
     styles = getSampleStyleSheet()
 
+    # Safely attempt to register a custom Unicode font if provided
+    base_font = "Helvetica"
+    font_path = os.path.join(os.path.dirname(__file__), "..", "assets", "fonts", "UnicodeFont.ttf")
+    if os.path.exists(font_path):
+        try:
+            pdfmetrics.registerFont(TTFont('UnicodeFont', font_path))
+            base_font = 'UnicodeFont'
+        except Exception:
+            pass
+
+    styles.add(ParagraphStyle(name='CustomNormal', parent=styles['Normal'], fontName=base_font, fontSize=11, leading=15))
+
+    # Dynamically load disease data
+    disease_names = []
+    dynamic_crops = ["Apple", "Corn", "Grape", "Peach", "Pepper", "Potato", "Strawberry", "Tomato"]
+    try:
+        json_path = os.path.join(os.path.dirname(__file__), "..", "disease_info.json")
+        with open(json_path, "r", encoding="utf-8") as f:
+            disease_data = json.load(f)
+        disease_names = sorted([info.get("disease_name", key.replace("___", " - ").replace("_", " ")) for key, info in disease_data.items()])
+
+        extracted_crops = set()
+        for name in disease_names:
+            if " - " in name:
+                extracted_crops.add(name.split(" - ")[0].strip())
+        if extracted_crops:
+            dynamic_crops = sorted(list(extracted_crops))
+    except Exception:
+        pass
+
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Title'],
+        fontName=base_font,
         fontSize=22,
         textColor=colors.HexColor('#1b4332'),
         spaceAfter=20
@@ -101,6 +136,7 @@ def _generate_dataset_pdf():
     h2_style = ParagraphStyle(
         'CustomH2',
         parent=styles['Heading2'],
+        fontName=base_font,
         fontSize=14,
         textColor=colors.HexColor('#2d6a4f'),
         spaceBefore=12,
@@ -112,23 +148,50 @@ def _generate_dataset_pdf():
     story.append(Spacer(1, 10))
 
     story.append(Paragraph("<b>Dataset Summary</b>", h2_style))
-    story.append(Paragraph("<b>Total classes:</b> 38+", styles["Normal"]))
-    story.append(Paragraph("<b>Image format:</b> 224 x 224 (RGB)", styles["Normal"]))
-    story.append(Paragraph("<b>Primary purpose:</b> Plant disease identification from leaf images", styles["Normal"]))
-    story.append(Paragraph("<b>Source:</b> PlantVillage & Augmented variations", styles["Normal"]))
+    story.append(Paragraph("<b>Total classes:</b> 38+", styles["CustomNormal"]))
+    story.append(Paragraph("<b>Image format:</b> 224 x 224 (RGB)", styles["CustomNormal"]))
+    story.append(Paragraph("<b>Primary purpose:</b> Plant disease identification from leaf images", styles["CustomNormal"]))
+    story.append(Paragraph("<b>Source:</b> PlantVillage & Augmented variations", styles["CustomNormal"]))
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("<b>Extended Details</b>", h2_style))
+    story.append(Paragraph("The Plantexa AI dataset is carefully curated from multiple reputable sources, primarily leveraging the widely-used PlantVillage dataset. To ensure robustness, we have augmented the dataset with realistic variations including noise, rotation, and differing lighting conditions. This prepares the model for real-world application across various environments and camera setups.", styles["CustomNormal"]))
     story.append(Spacer(1, 10))
 
     story.append(Paragraph("<b>Supported Crops</b>", h2_style))
-    crops = ["Apple", "Corn", "Grape", "Peach", "Pepper", "Potato", "Strawberry", "Tomato"]
-    story.append(Paragraph(", ".join(crops), styles["Normal"]))
+    story.append(Paragraph(", ".join(dynamic_crops), styles["CustomNormal"]))
     story.append(Spacer(1, 10))
 
     story.append(Paragraph("<b>Disease Categories</b>", h2_style))
-    story.append(Paragraph("The dataset includes healthy leaves and common disease categories such as bacterial spot, early blight, late blight, leaf mold, rust, powdery mildew, scab, and leaf scorch.", styles["Normal"]))
+    story.append(Paragraph("The dataset encompasses healthy leaves alongside prevalent disease categories such as bacterial spot, early blight, late blight, leaf mold, rust, powdery mildew, scab, and leaf scorch. It is continually updated to include new strains and localized diseases as data becomes available.", styles["CustomNormal"]))
+
+    if disease_names:
+        story.append(Spacer(1, 10))
+        story.append(Paragraph("<b>Complete List of Classes:</b>", ParagraphStyle(
+            'CustomH3', parent=styles['Heading3'], fontName=base_font, fontSize=12, textColor=colors.HexColor('#1b4332'), spaceAfter=8
+        )))
+
+        col1, col2 = [], []
+        for i, name in enumerate(disease_names):
+            if i % 2 == 0: col1.append(name)
+            else: col2.append(name)
+
+        if len(col1) > len(col2): col2.append("")
+
+        table_data = []
+        for c1, c2 in zip(col1, col2):
+            table_data.append([
+                Paragraph(f"• {c1}", styles["CustomNormal"]) if c1 else "",
+                Paragraph(f"• {c2}", styles["CustomNormal"]) if c2 else ""
+            ])
+
+        t = Table(table_data, colWidths=[3.2*inch, 3.2*inch])
+        t.setStyle(TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP'), ('BOTTOMPADDING', (0,0), (-1,-1), 4), ('LEFTPADDING', (0,0), (-1,-1), 0)]))
+        story.append(t)
 
     def add_footer(canvas, doc):
         canvas.saveState()
-        canvas.setFont('Helvetica', 9)
+        canvas.setFont(base_font, 9)
         canvas.setFillColor(colors.dimgrey)
         footer_text = f"Plantexa AI Dataset - Page {doc.page}"
         canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, footer_text)
