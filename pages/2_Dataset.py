@@ -140,15 +140,24 @@ def _generate_dataset_pdf():
     return buffer.getvalue()
 
 pdf_bytes = _generate_dataset_pdf()
-if pdf_bytes:
-    col1, col2 = st.columns([1, 2])
-    with col1:
+col1, col2 = st.columns([1, 2])
+with col1:
+    if pdf_bytes:
         st.download_button(
             label="Download Dataset PDF",
             data=pdf_bytes,
             file_name="plantexa_dataset.pdf",
             mime="application/pdf",
             use_container_width=True,
+        )
+    else:
+        st.download_button(
+            label="Download Dataset PDF",
+            data="Please run `pip install reportlab` to enable PDF downloads.",
+            file_name="download_error.txt",
+            mime="text/plain",
+            use_container_width=True,
+            help="ReportLab is required for PDF generation."
         )
 
 # Render floating chatbot globally
