@@ -778,6 +778,7 @@ def render_team_section():
         text-align: center;
         transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         transform-style: preserve-3d;
+        will-change: transform;
     }}
     .team-card-container:hover .team-card-inner {{
         transform: rotateY(180deg);
@@ -949,6 +950,8 @@ def render_team_section():
     </div>
     <script>
     if (window.teamCarouselInterval) clearInterval(window.teamCarouselInterval);
+    if (window.teamCarouselTimeout) clearTimeout(window.teamCarouselTimeout);
+
     const teamGrid = document.getElementById('team-carousel');
     if (teamGrid) {{
         window.teamCarouselInterval = setInterval(() => {{
@@ -956,18 +959,31 @@ def render_team_section():
                 const firstCard = teamGrid.querySelector('.team-card-container');
                 if (!firstCard) return;
                 const cardWidth = firstCard.offsetWidth + 16;
-                if (teamGrid.scrollLeft + teamGrid.clientWidth >= teamGrid.scrollWidth - 10) {{
-                    teamGrid.scrollTo({{ left: 0, behavior: 'smooth' }});
-                }} else {{
-                    teamGrid.scrollBy({{ left: cardWidth, behavior: 'smooth' }});
-                }}
+
+                teamGrid.scrollBy({{ left: cardWidth, behavior: 'smooth' }});
+
+                window.teamCarouselTimeout = setTimeout(() => {{
+                    teamGrid.style.scrollBehavior = 'auto';
+                    teamGrid.style.scrollSnapType = 'none';
+                    teamGrid.appendChild(firstCard);
+                    teamGrid.scrollLeft -= cardWidth;
+                    requestAnimationFrame(() => {{
+                        teamGrid.style.scrollBehavior = 'smooth';
+                        teamGrid.style.scrollSnapType = 'x mandatory';
+                    }});
+                }}, 600);
             }}
         }}, 2500); // <-- Adjust this number (in milliseconds) to change scroll speed
 
+        const stopCarousel = () => {{
+            clearInterval(window.teamCarouselInterval);
+            clearTimeout(window.teamCarouselTimeout);
+        }};
+
         /* Pause automatic swap when the user touches or interacts with the cards */
-        teamGrid.addEventListener('touchstart', () => clearInterval(window.teamCarouselInterval), {{passive: true}});
-        teamGrid.addEventListener('mousedown', () => clearInterval(window.teamCarouselInterval));
-        teamGrid.addEventListener('mouseenter', () => clearInterval(window.teamCarouselInterval)); // Pause on hover
+        teamGrid.addEventListener('touchstart', stopCarousel, {{passive: true}});
+        teamGrid.addEventListener('mousedown', stopCarousel);
+        teamGrid.addEventListener('mouseenter', stopCarousel); // Pause on hover
     }}
     </script>
     """)
