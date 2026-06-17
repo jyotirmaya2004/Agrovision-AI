@@ -1,3 +1,4 @@
+import contextlib
 import streamlit as st
 from backend.disease_info import _t
 
@@ -150,3 +151,24 @@ def top_predictions_card(predictions):
         """
     html_content += '</div>'
     st.html(html_content)
+
+
+@contextlib.contextmanager
+def render_floating_window(title: str, icon: str, marker_prefix: str, **kwargs):
+    container = st.container()
+    with container:
+        st.markdown(f'<div class="{marker_prefix}-floating-panel-marker"></div>', unsafe_allow_html=True)
+
+        # Header layout (Title + 3 Action Buttons)
+        cols = st.columns([10, 2, 2, 2])
+        with cols[0]:
+            st.markdown(f'<div style="display:flex;align-items:center;gap:10px;font-weight:800;color:white;margin-top:6px;margin-bottom:8px;"><i class="fa-solid {icon}" style="color:var(--leaf-accent);"></i> {_t(title)}</div>', unsafe_allow_html=True)
+
+        with cols[3]:
+            st.markdown(f'<div class="{marker_prefix}-btn-close-marker"></div>', unsafe_allow_html=True)
+            if st.button(_t("Close"), key=f"close_{marker_prefix}"):
+                st.session_state[f"{marker_prefix}_open"] = False
+                st.rerun()
+
+        body = st.container()
+        yield cols, body

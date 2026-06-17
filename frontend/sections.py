@@ -766,8 +766,7 @@ def render_team_section():
     <style>
     .team-card-container {{
         background-color: transparent;
-        min-width: 240px;
-        flex: 1 0 auto;
+        flex: 0 0 250px;
         scroll-snap-align: center;
         perspective: 1000px;
         height: 350px;
@@ -858,6 +857,7 @@ def render_team_section():
         font-family: 'Poppins', sans-serif;
         font-size: 18px;
         font-weight: 700;
+        line-height: 1.2;
     }}
     .team-name-back {{
         margin: 0 0 6px;
@@ -865,6 +865,7 @@ def render_team_section():
         font-family: 'Poppins', sans-serif;
         font-size: 22px;
         font-weight: 700;
+        line-height: 1.2;
     }}
     .team-role-back {{
         color: rgba(255,255,255,0.85);
@@ -940,17 +941,8 @@ def render_team_section():
             max-width: 280px;
         }}
     }}
-    .carousel-nav:hover {{
-        background: var(--leaf-primary) !important;
-        color: white !important;
-    }}
-    @media (max-width: 768px) {{
-        .carousel-nav {{ display: none !important; }}
-    }}
     </style>
     <div style="position: relative;">
-        <button class="carousel-nav" id="team-prev" style="position: absolute; left: -16px; top: calc(50% - 8px); transform: translateY(-50%); z-index: 10; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(34, 197, 94, 0.4); background: rgba(15, 23, 42, 0.9); color: var(--leaf-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"><i class="fa-solid fa-chevron-left"></i></button>
-        <button class="carousel-nav" id="team-next" style="position: absolute; right: -16px; top: calc(50% - 8px); transform: translateY(-50%); z-index: 10; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(34, 197, 94, 0.4); background: rgba(15, 23, 42, 0.9); color: var(--leaf-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"><i class="fa-solid fa-chevron-right"></i></button>
         <div class="team-grid" id="team-carousel">
             {cards_html}
         </div>
@@ -976,18 +968,6 @@ def render_team_section():
         teamGrid.addEventListener('touchstart', () => clearInterval(window.teamCarouselInterval), {{passive: true}});
         teamGrid.addEventListener('mousedown', () => clearInterval(window.teamCarouselInterval));
         teamGrid.addEventListener('mouseenter', () => clearInterval(window.teamCarouselInterval)); // Pause on hover
-
-        document.getElementById('team-prev')?.addEventListener('click', () => {{
-            clearInterval(window.teamCarouselInterval);
-            const firstCard = teamGrid.querySelector('.team-card-container');
-            if (firstCard) teamGrid.scrollBy({{ left: -(firstCard.offsetWidth + 16), behavior: 'smooth' }});
-        }});
-
-        document.getElementById('team-next')?.addEventListener('click', () => {{
-            clearInterval(window.teamCarouselInterval);
-            const firstCard = teamGrid.querySelector('.team-card-container');
-            if (firstCard) teamGrid.scrollBy({{ left: firstCard.offsetWidth + 16, behavior: 'smooth' }});
-        }});
     }}
     </script>
     """)
