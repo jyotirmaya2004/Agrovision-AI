@@ -1,4 +1,7 @@
+import io
+import os
 import streamlit as st
+from datetime import datetime, timezone, timedelta
 
 from frontend.components import page_header, section_title
 from frontend.styles import load_css
@@ -112,6 +115,134 @@ st.html(
     </div>
     """
 )
+
+def _generate_about_pdf():
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle, Image as RLImage
+        from reportlab.lib import colors
+        from reportlab.lib.units import inch
+    except ImportError:
+        return None
+
+    IST = timezone(timedelta(hours=5, minutes=30))
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40
+    )
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Title'],
+        fontSize=22,
+        textColor=colors.HexColor('#1b4332'),
+        spaceAfter=20
+    )
+
+    h2_style = ParagraphStyle(
+        'CustomH2',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#2d6a4f'),
+        spaceBefore=12,
+        spaceAfter=6
+    )
+
+    story = []
+    story.append(Paragraph("<b>Plantexa AI - About Project</b>", title_style))
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("<b>Project Overview</b>", h2_style))
+    story.append(Paragraph("Plantexa AI uses a two-stage deep learning workflow. It first checks whether the uploaded image looks like a plant leaf, then predicts the most likely disease and shows symptoms, causes, treatment, and prevention guidance from the disease knowledge base.", styles["Normal"]))
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("<b>Features</b>", h2_style))
+    story.append(Paragraph("• Two-Stage Pipeline: Leaf detection before disease classification<br/>• AI Analysis: Top 3 predictions with real-time confidence scores<br/>• Knowledge Base: Detailed disease symptoms, causes, treatment, and prevention<br/>• NVIDIA LLM: Context-aware AI agriculture assistant<br/>• Reporting: Downloadable PDF report cards and session prediction history", styles["Normal"]))
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("<b>Meet the Team</b>", h2_style))
+
+    team_members = [
+        {"name": "Jyotirmaya Behera", "id": "3146/24", "role": "AI Engineer", "contribution": "AI Models & Core Logic", "img_prefix": "jyotirmaya"},
+        {"name": "Diptesh Ranjan Pradhan", "id": "3141/24", "role": "Backend Developer", "contribution": "Database & Supabase API", "img_prefix": "diptesh"},
+        {"name": "Bibekananda Sahoo", "id": "3136/24", "role": "UI/UX Designer", "contribution": "Glassmorphism UI/UX Design", "img_prefix": "bibekananda"},
+        {"name": "Pritam Kumar Behera", "id": "3159/24", "role": "Frontend Developer", "contribution": "Streamlit Frontend & Logic", "img_prefix": "pritam"},
+        {"name": "Laxman Kumar Sahoo", "id": "3148/24", "role": "Data Scientist", "contribution": "Data Collection & Preprocessing", "img_prefix": "laxman"}
+    ]
+
+    for member in team_members:
+        img_path = ""
+        for ext in ['jpg', 'png', 'webp']:
+            p = os.path.join(os.path.dirname(__file__), "..", "assets", f"{member['img_prefix']}.{ext}")
+            if os.path.exists(p):
+                img_path = p
+                break
+
+        member_info = f"<b>{member['name']}</b> (ID: {member['id']})<br/><b>Role:</b> {member['role']}<br/><b>Contribution:</b> {member['contribution']}"
+
+        row_data = []
+        if img_path:
+            try:
+                from PIL import Image as PILImage
+                pil_img = PILImage.open(img_path).convert('RGB')
+                clean_img_io = io.BytesIO()
+                pil_img.save(clean_img_io, format='JPEG')
+                clean_img_io.seek(0)
+                img_width, img_height = pil_img.size
+                max_size = 1.2 * inch
+                ratio = min(max_size / img_width, max_size / img_height)
+                rl_img = RLImage(clean_img_io, width=img_width * ratio, height=img_height * ratio)
+                row_data.append(rl_img)
+            except Exception:
+                row_data.append(Paragraph("No Image", styles["Normal"]))
+        else:
+            row_data.append(Paragraph("No Image", styles["Normal"]))
+
+        row_data.append(Paragraph(member_info, styles["Normal"]))
+
+        t = Table([row_data], colWidths=[1.5*inch, 4.5*inch])
+        t.setStyle(TableStyle([
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+        ]))
+        story.append(t)
+        story.append(Spacer(1, 5))
+
+    def add_footer(canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 9)
+        canvas.setFillColor(colors.dimgrey)
+        footer_text = f"Plantexa AI About - Page {doc.page}"
+        canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, footer_text)
+        date_str = datetime.now(IST).strftime("%B %d, %Y")
+        canvas.drawString(0.5 * inch, 0.5 * inch, date_str)
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=add_footer, onLaterPages=add_footer)
+    return buffer.getvalue()
+
+pdf_bytes = _generate_about_pdf()
+col1, col2 = st.columns([1, 2])
+with col1:
+    if pdf_bytes:
+        st.download_button(
+            label="Download About PDF",
+            data=pdf_bytes,
+            file_name="plantexa_about.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+        )
+    else:
+        st.download_button(
+            label="Download About PDF",
+            data="Please run `pip install reportlab` to enable PDF downloads.",
+            file_name="download_error.txt",
+            mime="text/plain",
+            use_container_width=True,
+            help="ReportLab is required for PDF generation."
+        )
 
 # Render floating chatbot globally
 chatbot_ui()

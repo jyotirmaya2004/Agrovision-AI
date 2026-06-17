@@ -1,4 +1,6 @@
+import io
 import streamlit as st
+from datetime import datetime, timezone, timedelta
 
 from frontend.components import page_header, section_title
 from frontend.styles import load_css
@@ -70,6 +72,84 @@ st.html(
     </div>
     """,
 )
+
+def _generate_dataset_pdf():
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
+        from reportlab.lib import colors
+        from reportlab.lib.units import inch
+    except ImportError:
+        return None
+
+    IST = timezone(timedelta(hours=5, minutes=30))
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40
+    )
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Title'],
+        fontSize=22,
+        textColor=colors.HexColor('#1b4332'),
+        spaceAfter=20
+    )
+
+    h2_style = ParagraphStyle(
+        'CustomH2',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#2d6a4f'),
+        spaceBefore=12,
+        spaceAfter=6
+    )
+
+    story = []
+    story.append(Paragraph("<b>Plantexa AI - Dataset Information</b>", title_style))
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("<b>Dataset Summary</b>", h2_style))
+    story.append(Paragraph("<b>Total classes:</b> 38+", styles["Normal"]))
+    story.append(Paragraph("<b>Image format:</b> 224 x 224 (RGB)", styles["Normal"]))
+    story.append(Paragraph("<b>Primary purpose:</b> Plant disease identification from leaf images", styles["Normal"]))
+    story.append(Paragraph("<b>Source:</b> PlantVillage & Augmented variations", styles["Normal"]))
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("<b>Supported Crops</b>", h2_style))
+    crops = ["Apple", "Corn", "Grape", "Peach", "Pepper", "Potato", "Strawberry", "Tomato"]
+    story.append(Paragraph(", ".join(crops), styles["Normal"]))
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("<b>Disease Categories</b>", h2_style))
+    story.append(Paragraph("The dataset includes healthy leaves and common disease categories such as bacterial spot, early blight, late blight, leaf mold, rust, powdery mildew, scab, and leaf scorch.", styles["Normal"]))
+
+    def add_footer(canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 9)
+        canvas.setFillColor(colors.dimgrey)
+        footer_text = f"Plantexa AI Dataset - Page {doc.page}"
+        canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, footer_text)
+        date_str = datetime.now(IST).strftime("%B %d, %Y")
+        canvas.drawString(0.5 * inch, 0.5 * inch, date_str)
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=add_footer, onLaterPages=add_footer)
+    return buffer.getvalue()
+
+pdf_bytes = _generate_dataset_pdf()
+if pdf_bytes:
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        st.download_button(
+            label="Download Dataset PDF",
+            data=pdf_bytes,
+            file_name="plantexa_dataset.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+        )
 
 # Render floating chatbot globally
 chatbot_ui()

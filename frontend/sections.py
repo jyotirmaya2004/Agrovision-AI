@@ -3,6 +3,7 @@ import os
 import re
 import time
 import uuid
+import base64
 from datetime import datetime, timezone, timedelta
 
 import pandas as pd
@@ -22,6 +23,15 @@ from frontend.components import (
 
 # Define Indian Standard Time (IST) for accurate timestamps
 IST = timezone(timedelta(hours=5, minutes=30))
+
+def _get_local_image_b64(filename):
+    path = os.path.join(os.path.dirname(__file__), "..", "assets", filename)
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            ext = filename.split('.')[-1].lower()
+            mime = f"image/{ext}" if ext != 'jpg' else "image/jpeg"
+            return f"data:{mime};base64,{base64.b64encode(f.read()).decode()}"
+    return ""
 
 @st.cache_data(ttl=300, show_spinner=False)
 def _fetch_history_cached(user_id):
@@ -594,7 +604,7 @@ def render_prediction_section(image_file):
             st.warning("ReportLab is required to generate PDF reports. Please run `pip install reportlab`.")
 
 def render_history_section():
-    section_title(_t("Prediction History"), "fa-clock-rotate-left")
+    section_title(_t("Prediction History"), "fa-clock-rotate-left", anchor_id="history-section")
 
     history = load_history()
     st.session_state.prediction_history = history
@@ -648,16 +658,6 @@ def render_history_section():
 def render_tips_section():
     section_title(_t("Quick Care Tips"), "fa-lightbulb")
 
-    def _get_local_image_b64(filename):
-        import base64
-        import os
-        path = os.path.join(os.path.dirname(__file__), "..", "assets", filename)
-        if os.path.exists(path):
-            with open(path, "rb") as f:
-                ext = filename.split('.')[-1].lower()
-                mime = f"image/{ext}" if ext != 'jpg' else "image/jpeg"
-                return f"data:{mime};base64,{base64.b64encode(f.read()).decode()}"
-        return ""
 
     img_watering = _get_local_image_b64("watering.jpg") or _get_local_image_b64("watering.png") or _get_local_image_b64("watering.webp")
     img_sunlight = _get_local_image_b64("sunlight.jpg") or _get_local_image_b64("sunlight.png") or _get_local_image_b64("sunlight.webp")
@@ -705,18 +705,8 @@ def render_tips_section():
     """)
 
 def render_team_section():
-    section_title(_t("Meet the Team"), "fa-users")
+    section_title(_t("Meet the Team"), "fa-users", anchor_id="team-section")
 
-    def _get_local_image_b64(filename):
-        import base64
-        import os
-        path = os.path.join(os.path.dirname(__file__), "..", "assets", filename)
-        if os.path.exists(path):
-            with open(path, "rb") as f:
-                ext = filename.split('.')[-1].lower()
-                mime = f"image/{ext}" if ext != 'jpg' else "image/jpeg"
-                return f"data:{mime};base64,{base64.b64encode(f.read()).decode()}"
-        return ""
 
     team_members = [
         {"name": "Jyotirmaya Behera", "id": "3146/24", "role": "AI Engineer", "contribution": "AI Models & Core Logic", "img_prefix": "jyotirmaya", "github": "https://github.com/", "linkedin": "https://linkedin.com/in/", "instagram": "https://instagram.com/", "facebook": "https://facebook.com/"},
@@ -1071,17 +1061,17 @@ def render_footer():
                 <div class="footer-col">
                     <h4 class="f-heading">{_t('Navigation')}</h4>
                     <a href="/" class="f-link">{_t('Home')}</a>
-                    <a href="/#diagnosis-section" class="f-link">{_t('Disease Detection')}</a>
-                    <a href="?action=history" class="f-link">{_t('Prediction History')}</a>
-                    <a href="?action=profile" class="f-link">{_t('Profile')}</a>
-                    <a href="?action=admin" class="f-link">{_t('Admin')}</a>
+                    <a href="#diagnosis-section" class="f-link">{_t('Disease Detection')}</a>
+                    <a href="#history-section" class="f-link">{_t('Prediction History')}</a>
+                    <a href="#team-section" class="f-link">{_t('Team')}</a>
+                    <a href="/Admin" class="f-link">{_t('Admin')}</a>
                 </div>
 
                 <!-- Column 3: Resources -->
                 <div class="footer-col">
                     <h4 class="f-heading">{_t('Resources')}</h4>
-                    <a href="?action=about" class="f-link">{_t('About Plantexa AI')}</a>
-                    <a href="?action=dataset" class="f-link">{_t('Dataset Information')}</a>
+                    <a href="/About" class="f-link">{_t('About Plantexa AI')}</a>
+                    <a href="/Dataset" class="f-link">{_t('Dataset Information')}</a>
                     <a href="#" class="f-link">{_t('User Guide')}</a>
                     <a href="#" class="f-link">FAQ</a>
                     <a href="#" class="f-link">{_t('Privacy Policy')}</a>

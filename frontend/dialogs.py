@@ -1,11 +1,8 @@
-import os
 import re
 import time
 
-import pandas as pd
 import streamlit as st
 
-from frontend.components import empty_placeholder, get_confidence_color
 from backend.disease_info import _t
 
 
@@ -27,6 +24,13 @@ def render_auth_dialog():
         st.markdown('<div class="login-btn-marker"></div>', unsafe_allow_html=True)
         if st.button(_t("Login"), type="primary", use_container_width=True):
             if username.strip() and password.strip():
+                loader_placeholder = st.empty()
+                loader_placeholder.html(f"""
+                <div class="global-loader-overlay">
+                    <div class="global-spinner"></div>
+                    <h3 class="global-loader-text">{_t("Authenticating...")}</h3>
+                </div>
+                """)
                 try:
                     from backend.db import authenticate_user, check_user_exists
                     user_data = authenticate_user(username, password)
@@ -40,11 +44,13 @@ def render_auth_dialog():
                         st.session_state.show_auth = False
                         st.rerun()
                     else:
+                        loader_placeholder.empty()
                         if check_user_exists(username):
                             st.error(_t("Incorrect password."))
                         else:
                             st.error(_t("Username not found. Please create an account."))
                 except Exception as e:
+                    loader_placeholder.empty()
                     st.error(f"{_t('Login failed:')} {e}")
             else:
                 st.error(_t("Please enter both username and password."))
@@ -102,9 +108,17 @@ def render_auth_dialog():
 
         st.markdown('<div class="signup-btn-marker"></div>', unsafe_allow_html=True)
         if st.button(_t("Create Account"), type="primary", use_container_width=True, disabled=btn_disabled):
+            loader_placeholder = st.empty()
+            loader_placeholder.html(f"""
+            <div class="global-loader-overlay">
+                <div class="global-spinner"></div>
+                <h3 class="global-loader-text">{_t("Creating account...")}</h3>
+            </div>
+            """)
             try:
                 from backend.db import check_user_exists, create_user
                 if check_user_exists(new_username):
+                    loader_placeholder.empty()
                     st.error(_t("Username already exists. Please log in or choose another."))
                 else:
                     insert_res = create_user(new_username, new_password, avatar_emoji)
@@ -119,245 +133,8 @@ def render_auth_dialog():
                         st.session_state.new_account = True
                         st.rerun()
                     else:
+                        loader_placeholder.empty()
                         st.error(_t("Failed to create new user account."))
             except Exception as e:
+                loader_placeholder.empty()
                 st.error(f"{_t('Registration failed:')} {e}")
-
-
-@st.dialog(_t("Prediction History"), width="large")
-def render_history_dialog():
-    from frontend.sections import _generate_history_pdf, clear_history, load_history
-
-    history = load_history()
-    if not history:
-        empty_placeholder("fa-folder-open", _t("No History Found"), _t("Analyze a leaf from the Home page first to see records here."))
-    else:
-        df = pd.DataFrame(history)
-
-        def color_confidence(val):
-            try:
-                return f'color: {get_confidence_color(float(val))}'
-            except Exception:
-                return ''
-
-        styled_df = df.style.map(color_confidence, subset=['Confidence'])
-
-        st.dataframe(
-            styled_df,
-            use_container_width=True,
-            column_config={
-                "Image_URL": st.column_config.ImageColumn(_t("Uploaded Image")),
-                "Confidence": st.column_config.NumberColumn(_t("Confidence"), format="%.2f%%")
-            }
-        )
-
-        col1, col2, col3 = st.columns(3)
-        pdf_bytes = _generate_history_pdf(history)
-        if pdf_bytes:
-            with col1:
-                st.download_button(
-                    label=_t("Download History PDF"),
-                    data=pdf_bytes,
-                    file_name="plantexa_ai_history.pdf",
-                    mime="application/pdf",
-                    use_container_width=True,
-                )
-        with col2:
-            st.download_button(
-                _t("Download CSV"),
-                df.to_csv(index=False),
-                file_name="prediction_history.csv",
-                mime="text/csv",
-                use_container_width=True,
-            )
-        with col3:
-            if st.button(_t("Clear History"), use_container_width=True):
-                clear_history()
-                st.session_state.prediction_history = []
-                st.rerun()
-
-
-@st.dialog(_t("Dataset Information"), width="large")
-def render_dataset_dialog():
-    st.html(f"""
-    <div class="glass-card" style="padding: 24px; height: 100%;">
-        <h3 style="margin-top: 0; color: var(--leaf-primary); font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-chart-pie"></i> {_t('Dataset Summary')}</h3>
-        <ul style="color: var(--leaf-muted); font-size: 16px; padding-left: 20px; line-height: 1.8; margin: 0;">
-            <li><strong>{_t('Total classes')}:</strong> 38+</li>
-            <li><strong>{_t('Image format')}:</strong> 224 x 224 (RGB)</li>
-            <li><strong>{_t('Primary purpose')}:</strong> {_t('Plant disease identification from leaf images')}</li>
-            <li><strong>{_t('Source')}:</strong> {_t('PlantVillage & Augmented variations')}</li>
-        </ul>
-    </div>
-    <br>
-    <div class="glass-card" style="padding: 24px; height: 100%;">
-        <h3 style="margin-top: 0; color: var(--leaf-primary); font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-seedling"></i> {_t('Supported Crops')}</h3>
-        <ul style="color: var(--leaf-muted); font-size: 16px; padding-left: 20px; line-height: 1.6; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <li><i class="fa-solid fa-apple-whole" style="color: #ef4444; width: 20px;"></i> {_t('Apple')}</li>
-            <li><i class="fa-solid fa-seedling" style="color: #eab308; width: 20px;"></i> {_t('Corn')}</li>
-            <li><i class="fa-solid fa-leaf" style="color: #a855f7; width: 20px;"></i> {_t('Grape')}</li>
-            <li><i class="fa-solid fa-lemon" style="color: #fb923c; width: 20px;"></i> {_t('Peach')}</li>
-            <li><i class="fa-solid fa-pepper-hot" style="color: #ef4444; width: 20px;"></i> {_t('Pepper')}</li>
-            <li><i class="fa-solid fa-carrot" style="color: #d97706; width: 20px;"></i> {_t('Potato')}</li>
-            <li><i class="fa-solid fa-leaf" style="color: #f43f5e; width: 20px;"></i> {_t('Strawberry')}</li>
-            <li><i class="fa-solid fa-apple-whole" style="color: #ef4444; width: 20px;"></i> {_t('Tomato')}</li>
-        </ul>
-    </div>
-    <br>
-    <div class="glass-card" style="padding: 24px; margin-bottom: 8px;">
-        <h3 style="margin-top: 0; color: var(--leaf-primary); font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-viruses"></i> {_t('Disease Categories')}</h3>
-        <p style="color: var(--leaf-muted); font-size: 16px; line-height: 1.6; margin: 0;">
-            {_t('The dataset includes healthy leaves and common disease categories such as bacterial spot, early blight, late blight, leaf mold, rust, powdery mildew, scab, and leaf scorch.')}
-        </p>
-    </div>
-    """)
-
-
-@st.dialog(_t("About Plantexa AI"), width="large")
-def render_about_dialog():
-    st.html(f"""
-    <div class="glass-card" style="padding: 24px; margin-bottom: 24px;">
-        <p style="color: var(--leaf-muted); font-size: 16px; margin: 0;">
-            {_t('Plantexa AI uses a two-stage deep learning workflow. It first checks whether the uploaded image looks like a plant leaf, then predicts the most likely disease and shows symptoms, causes, treatment, and prevention guidance from the disease knowledge base.')}
-        </p>
-    </div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
-        <div class="glass-card" style="padding: 24px;">
-            <h4 style="margin-top: 0; color: var(--leaf-primary); font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-desktop"></i> {_t('Frontend')}</h4>
-            <ul style="color: var(--leaf-muted); font-size: 14px; padding-left: 20px;">
-                <li>{_t('Streamlit')}</li>
-                <li>{_t('HTML components')}</li>
-                <li>{_t('Modern Glassmorphism CSS')}</li>
-            </ul>
-        </div>
-        <div class="glass-card" style="padding: 24px;">
-            <h4 style="margin-top: 0; color: var(--leaf-primary); font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-server"></i> {_t('Backend')}</h4>
-            <ul style="color: var(--leaf-muted); font-size: 14px; padding-left: 20px;">
-                <li>{_t('Python')}</li>
-                <li>{_t('TensorFlow')}</li>
-                <li>{_t('NumPy & Pandas')}</li>
-            </ul>
-        </div>
-        <div class="glass-card" style="padding: 24px;">
-            <h4 style="margin-top: 0; color: var(--leaf-primary); font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-brain"></i> {_t('Models')}</h4>
-            <ul style="color: var(--leaf-muted); font-size: 14px; padding-left: 20px;">
-                <li>{_t('MobileNetV2 classifier')}</li>
-                <li>{_t('Leaf validation network')}</li>
-                <li>{_t('224 x 224 resolution')}</li>
-            </ul>
-        </div>
-    </div>
-    <div class="glass-card" style="padding: 24px; margin-bottom: 24px;">
-        <h4 style="margin-top: 0; color: var(--leaf-text); font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-list-check" style="color: var(--leaf-primary);"></i> {_t('Project Features')}</h4>
-        <ul style="color: var(--leaf-muted); font-size: 15px; margin: 0; padding-left: 20px; line-height: 1.8;">
-            <li><strong>{_t('Two-Stage Pipeline')}:</strong> {_t('Leaf detection before disease classification')}</li>
-            <li><strong>{_t('AI Analysis')}:</strong> {_t('Top 3 predictions with real-time confidence scores')}</li>
-            <li><strong>{_t('Knowledge Base')}:</strong> {_t('Detailed disease symptoms, causes, treatment, and prevention')}</li>
-            <li><strong>{_t('NVIDIA LLM')}:</strong> {_t('Context-aware AI agriculture assistant')}</li>
-            <li><strong>{_t('Reporting')}:</strong> {_t('Downloadable PDF report cards and session prediction history')}</li>
-        </ul>
-    </div>
-    <div class="glass-card" style="padding: 24px; margin-bottom: 8px;">
-        <h4 style="margin-top: 0; color: var(--leaf-text); font-family: 'Poppins', sans-serif;"><i class="fa-solid fa-graduation-cap" style="color: var(--leaf-primary);"></i> {_t('Academic Details')}</h4>
-        <p style="color: var(--leaf-muted); font-size: 15px; line-height: 1.8; margin-bottom: 8px;"><strong>{_t('Project Team Members')}:</strong><br>
-        Jyotirmaya Behera (3146/24), Diptesh Ranjan Pradhan (3141/24), Bibekananda Sahoo (3136/24), Pritam Kumar Behera (3159/24), Laxman Kumar Sahoo (3148/24)</p>
-        <p style="color: var(--leaf-muted); font-size: 15px; margin: 0;"><strong>{_t('Academic Year')}:</strong> 2025 - 2026</p>
-    </div>
-    """)
-
-
-@st.dialog(_t("Admin - Database Viewer"), width="large")
-def render_admin_dialog():
-    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
-
-    if not st.session_state.get("admin_authenticated", False):
-        st.html(f"""
-        <div class="glass-card" style="padding: 32px 24px; text-align: center; margin-bottom: 24px; border-top: 3px solid #ef4444;">
-            <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444; font-size: 28px; margin-bottom: 16px;">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <h2 style="margin: 0 0 12px 0; font-family: 'Poppins', sans-serif; color: var(--leaf-text);">{_t('Admin Access Restricted')}</h2>
-            <p style="margin: 0; color: var(--leaf-muted); font-size: 16px;">{_t('Please enter the master admin password to access the database viewer.')}</p>
-        </div>
-        """)
-        pwd = st.text_input(_t("Admin Password"), type="password", placeholder=_t("Enter admin password"), label_visibility="collapsed", key="dlg_admin_pass")
-        if st.button(_t("Unlock Dashboard"), type="primary", use_container_width=True):
-            if pwd == ADMIN_PASSWORD:
-                st.session_state.admin_authenticated = True
-                st.rerun()
-            else:
-                st.error(_t("Incorrect admin password."))
-        return
-
-    if st.button(_t("Lock Dashboard"), key="dlg_lock_dashboard"):
-        st.session_state.admin_authenticated = False
-        st.rerun()
-
-    try:
-        from backend.db import get_all_predictions, delete_prediction, delete_all_predictions
-        response = get_all_predictions()
-        df = pd.DataFrame(response.data)
-
-        if not df.empty:
-            df["username"] = df["app_users"].apply(lambda x: x.get("username") if isinstance(x, dict) else _t("Unknown"))
-            df = df.drop(columns=["app_users"])
-            cols = ["id", "username", "timestamp", "disease", "confidence", "image_url", "user_id"]
-            df = df[[c for c in cols if c in df.columns]]
-        else:
-            df = pd.DataFrame(columns=["id", "username", "timestamp", "disease", "confidence", "image_url", "user_id"])
-
-        st.write(f"### {_t('Total Records')}: {len(df)}")
-        st.dataframe(
-            df.style.map(lambda v: f'color: {get_confidence_color(float(v))}' if isinstance(v, (int, float)) else '', subset=['confidence']),
-            use_container_width=True,
-            column_config={
-                "image_url": st.column_config.ImageColumn(_t("Uploaded Image")),
-                "confidence": st.column_config.NumberColumn(_t("Confidence"), format="%.2f%%")
-            }
-        )
-
-        if not df.empty:
-            st.write(f"#### {_t('Manage Records')}")
-            col_sel, col_btn_del, col_btn_all = st.columns([2, 1, 1])
-            with col_sel:
-                row_id = st.selectbox(_t("Select Record ID to delete"), df["id"].tolist(), label_visibility="collapsed")
-            with col_btn_del:
-                if st.button(_t("Delete Row"), use_container_width=True):
-                    delete_prediction(row_id)
-                    st.rerun()
-            with col_btn_all:
-                confirm_delete = st.checkbox(_t("Confirm wipe"))
-                if st.button(_t("Delete ALL"), type="primary", use_container_width=True, disabled=not confirm_delete):
-                    delete_all_predictions()
-                    st.rerun()
-    except Exception as e:
-        st.error(f"{_t('Could not load database:')} {e}")
-
-
-@st.dialog(_t("User Profile"), width="large")
-def render_profile_dialog():
-    from frontend.sections import load_history
-
-    username = st.session_state.get("username", _t("Unknown User"))
-    avatar = st.session_state.get("avatar", "🧑‍🌾")
-    user_id = st.session_state.get("user_id", "N/A")
-    history = load_history()
-
-    st.html(f"""
-    <div class="glass-card" style="padding: 32px 24px; text-align: center; margin-bottom: 24px; border-top: 3px solid var(--leaf-primary);">
-        <div style="font-size: 72px; margin-bottom: 16px;">{avatar}</div>
-        <h2 style="margin: 0 0 8px 0; font-family: 'Poppins', sans-serif; color: var(--leaf-text);">{username}</h2>
-        <p style="margin: 0; color: var(--leaf-muted); font-size: 14px;"><strong>{_t('Account ID')}:</strong> {user_id}</p>
-    </div>
-    <div style="display: flex; gap: 16px; margin-bottom: 24px;">
-        <div class="glass-card" style="flex: 1; padding: 16px; text-align: center;">
-            <div style="font-size: 24px; font-weight: 800; color: var(--leaf-primary);">{len(history)}</div>
-            <div style="font-size: 13px; color: var(--leaf-muted); text-transform: uppercase;">{_t('Total Scans')}</div>
-        </div>
-    </div>
-    """)
-
-    if st.button(_t("Logout"), type="primary", use_container_width=True):
-        st.session_state.clear()
-        st.session_state.clear_cookie = True
-        st.rerun()

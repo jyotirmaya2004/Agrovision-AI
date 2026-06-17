@@ -1,18 +1,11 @@
-import os
 import time
 
 import streamlit as st
 from dotenv import load_dotenv
 
 from frontend.chatbot import chatbot_ui
-from frontend.dialogs import (
-    render_about_dialog,
-    render_admin_dialog,
-    render_auth_dialog,
-    render_dataset_dialog,
-    render_history_dialog,
-    render_profile_dialog,
-)
+from frontend.dialogs import render_auth_dialog
+
 from frontend.sections import (
     render_footer,
     render_header,
@@ -34,7 +27,7 @@ def _handle_query_params():
     We also ensure we never clear session unless the user is already logged in.
     """
     action = st.query_params.get("action")
-    if action:
+    if action in ["login", "logout"]:
         if action == "login":
             st.session_state.show_auth = True
         elif action == "logout":
@@ -42,23 +35,11 @@ def _handle_query_params():
             if st.session_state.get("username"):
                 st.session_state.clear()
                 st.session_state.clear_cookie = True
-        elif action == "history":
-            render_history_dialog()
-        elif action == "dataset":
-            render_dataset_dialog()
-        elif action == "about":
-            render_about_dialog()
-        elif action == "admin":
-            render_admin_dialog()
-        elif action == "profile":
-            render_profile_dialog()
 
         if "action" in st.query_params:
             del st.query_params["action"]
 
-        # Only force rerun for auth actions; dialogs will render directly during this run
-        if action in ["login", "logout"]:
-            st.rerun()
+        st.rerun()
 
     lang = st.query_params.get("lang")
     if lang:
@@ -187,6 +168,10 @@ def render_navbar(current_page: str = "Home"):
         curr_lang = st.session_state.get('lang_code', 'en')
         check_icon = '<i class="fa-solid fa-check" style="margin-left: auto;"></i>'
 
+        # Use relative anchors for smooth CSS scrolling when already on the Home page
+        history_link = "#history-section" if current_page == "Home" else "/#history-section"
+        team_link = "#team-section" if current_page == "Home" else "/#team-section"
+
         st.html(f"""
         <input type="checkbox" id="mobile-menu-toggle" class="mobile-menu-toggle">
         <div class="nav-background"></div>
@@ -203,11 +188,11 @@ def render_navbar(current_page: str = "Home"):
             <div class="nav-right">
                 <div class="nav-links" role="navigation" aria-label="Primary">
                     <a href="/" class="nav-link{' active' if current_page == 'Home' else ''}">{_t('Home')}</a>
-                    <a href="?action=dataset" class="nav-link">{_t('Dataset')}</a>
-                    <a href="?action=history" class="nav-link">{_t('History')}</a>
-                    <a href="?action=profile" class="nav-link">{_t('Profile')}</a>
-                    <a href="?action=about" class="nav-link">{_t('About')}</a>
-                    <a href="?action=admin" class="nav-link">{_t('Admin')}</a>
+                    <a href="/Dataset" class="nav-link{' active' if current_page == 'Dataset' else ''}">{_t('Dataset')}</a>
+                    <a href="{history_link}" class="nav-link{' active' if current_page == 'History' else ''}">{_t('History')}</a>
+                    <a href="{team_link}" class="nav-link{' active' if current_page == 'Team' else ''}">{_t('Team')}</a>
+                    <a href="/About" class="nav-link{' active' if current_page == 'About' else ''}">{_t('About')}</a>
+                    <a href="/Admin" class="nav-link{' active' if current_page == 'Admin' else ''}">{_t('Admin')}</a>
                 </div>
 
                 <div class="lang-dropdown-container desktop-lang-toggle">
@@ -234,11 +219,11 @@ def render_navbar(current_page: str = "Home"):
         <div class="mobile-dropdown" role="dialog" aria-label="Mobile navigation">
             <div class="mobile-nav-links">
                 <a href="/" class="nav-link mobile-nav-link{' active' if current_page == 'Home' else ''}"><i class="fa-solid fa-house" style="margin-right: 8px;"></i> {_t('Home')}</a>
-                <a href="?action=dataset" class="nav-link mobile-nav-link"><i class="fa-solid fa-database" style="margin-right: 8px;"></i> {_t('Dataset')}</a>
-                <a href="?action=history" class="nav-link mobile-nav-link"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 8px;"></i> {_t('History')}</a>
-                <a href="?action=profile" class="nav-link mobile-nav-link"><i class="fa-solid fa-user" style="margin-right: 8px;"></i> {_t('Profile')}</a>
-                <a href="?action=about" class="nav-link mobile-nav-link"><i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> {_t('About')}</a>
-                <a href="?action=admin" class="nav-link mobile-nav-link"><i class="fa-solid fa-lock" style="margin-right: 8px;"></i> {_t('Admin')}</a>
+                <a href="/Dataset" class="nav-link mobile-nav-link{' active' if current_page == 'Dataset' else ''}"><i class="fa-solid fa-database" style="margin-right: 8px;"></i> {_t('Dataset')}</a>
+                <a href="{history_link}" class="nav-link mobile-nav-link{' active' if current_page == 'History' else ''}"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 8px;"></i> {_t('History')}</a>
+                <a href="{team_link}" class="nav-link mobile-nav-link{' active' if current_page == 'Team' else ''}"><i class="fa-solid fa-users" style="margin-right: 8px;"></i> {_t('Team')}</a>
+                <a href="/About" class="nav-link mobile-nav-link{' active' if current_page == 'About' else ''}"><i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> {_t('About')}</a>
+                <a href="/Admin" class="nav-link mobile-nav-link{' active' if current_page == 'Admin' else ''}"><i class="fa-solid fa-lock" style="margin-right: 8px;"></i> {_t('Admin')}</a>
 
                 <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 4px 0;"></div>
                 <div style="padding: 4px 14px 0; font-size: 13px; color: var(--leaf-muted); font-weight: 600; text-transform: uppercase;">{_t('Language')}</div>
@@ -380,18 +365,6 @@ def main(active_tab: str = "all"):
     render_navbar("Home")
     require_username()
     render_header()
-
-    if active_tab == "history":
-        render_history_section()
-        return
-
-    if active_tab == "tips":
-        render_tips_section()
-        return
-
-    if active_tab == "chat":
-        chatbot_ui()
-        return
 
     image_file = render_upload_section()
     render_prediction_section(image_file)

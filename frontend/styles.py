@@ -34,6 +34,11 @@ def load_css():
             <div class="bg-layer overlay"></div>
         </div>
 
+        <!-- Animated Back to Top Button -->
+        <button id="backToTopBtn" class="back-to-top-btn" aria-label="Scroll back to top">
+            <i class="fa-solid fa-arrow-up"></i>
+        </button>
+
         <style>
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css');
         :root{
@@ -73,8 +78,8 @@ def load_css():
         }
 
         /* Enable smooth scrolling for anchor links */
-        html, body, .stApp {
-            scroll-behavior: smooth;
+            html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+                scroll-behavior: smooth !important;
             font-size: var(--body-size);
             overflow-x: hidden;
         }
@@ -187,6 +192,30 @@ def load_css():
             -webkit-backdrop-filter: blur(60px);
             background: rgba(2, 6, 23, 0.4);
         }
+
+        /* --- Global Loader Overlay --- */
+        .global-loader-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 999999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .global-spinner {
+            width: 60px; height: 60px;
+            border: 5px solid rgba(34, 197, 94, 0.2);
+            border-top-color: var(--leaf-primary);
+            border-radius: 50%;
+            animation: globalSpin 1s linear infinite;
+        }
+        .global-loader-text {
+            color: white; margin-top: 24px; font-family: 'Poppins', sans-serif;
+            font-weight: 600; font-size: 18px; letter-spacing: 1px;
+            animation: pulseText 1.5s ease-in-out infinite;
+        }
+        @keyframes globalSpin { 100% { transform: rotate(360deg); } }
+        @keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
         /* Animated Background */
         @keyframes gradientShift {
@@ -838,7 +867,8 @@ def load_css():
             background-size: 200% auto;
             color: white;
             font-weight: 700;
-            padding: 8px 24px;
+            padding: 8px 20px;
+            font-size: 14px;
             transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
@@ -861,9 +891,9 @@ def load_css():
             background-size: 200% auto;
             color:white;
             font-weight:700;
-            min-height: 48px;
-            padding: 12px 24px;
-            font-size: 16px;
+            min-height: 40px;
+            padding: 8px 20px;
+            font-size: 14.5px;
             display: inline-flex;
             justify-content: center;
             align-items: center;
@@ -899,11 +929,11 @@ def load_css():
             background: linear-gradient(135deg, var(--leaf-primary), var(--leaf-primary-dark), var(--leaf-primary));
             background-size: 200% auto;
             color: white !important;
-            font-size: 16px;
+            font-size: 14.5px;
             font-weight: 700;
             border-radius: 12px !important;
-            padding: 14px 24px;
-            min-height: 48px;
+            padding: 10px 20px;
+            min-height: 40px;
             border: none;
             box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
             transition: all 0.3s ease;
@@ -919,19 +949,19 @@ def load_css():
         .analyze-btn-spacer { height: 16px; }
 
         div[data-testid="stElementContainer"]:has(.analyze-btn-marker) + div[data-testid="stElementContainer"] button[kind="primary"] {
-            max-width: 320px;
+            max-width: 260px;
             margin: 0 auto;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
-            padding: 14px 32px;
-            min-height: 56px;
+            padding: 12px 28px;
+            min-height: 48px;
             border-radius: 30px !important;
         }
 
         /* --- Button FontAwesome Icons via Markers --- */
         div[data-testid="stElementContainer"]:has(.analyze-btn-marker) + div[data-testid="stElementContainer"] button[kind="primary"]::before {
             content: "\\f610"; /* fa-microscope */
-            font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 12px; font-size: 20px;
+            font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 10px; font-size: 18px;
         }
 
         div[data-testid="stElementContainer"]:has(.login-btn-marker) + div[data-testid="stElementContainer"] button[kind="primary"]::before {
@@ -990,9 +1020,9 @@ def load_css():
         @media (max-width: 768px) {
             .stButton button,
             div[data-testid="stDownloadButton"] button {
-                font-size: 15px;
-                padding: 10px 18px;
-                min-height: 44px;
+                font-size: 14px;
+                padding: 8px 16px;
+                min-height: 38px;
             }
         }
 
@@ -1099,9 +1129,10 @@ def load_css():
         div[data-testid="stDialog"] div[data-testid="stTextInput"] div[data-baseweb="input"],
         div[data-testid="stDialog"] div[data-testid="stSelectbox"] div[data-baseweb="select"] {
             background-color: rgba(255, 255, 255, 0.02) !important;
-            border-radius: 12px !important;
+            border-radius: 10px !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             transition: all 0.3s ease !important;
+            min-height: 38px !important;
         }
 
         div[data-testid="stDialog"] div[data-testid="stTextInput"] div[data-baseweb="input"]:focus-within,
@@ -1113,11 +1144,17 @@ def load_css():
 
         div[data-testid="stDialog"] div[data-testid="stTextInput"] input {
             color: var(--leaf-text) !important;
-            font-size: 15px !important;
+            font-size: 14px !important;
             background-color: transparent !important;
-            padding-top: 12px !important;
-            padding-bottom: 12px !important;
+            padding-top: 8px !important;
+            padding-bottom: 8px !important;
             caret-color: var(--leaf-primary) !important;
+        }
+
+        div[data-testid="stDialog"] div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+            font-size: 14px !important;
+            padding-top: 2px !important;
+            padding-bottom: 2px !important;
         }
 
         div[data-testid="stDialog"] div[data-testid="stTextInput"] input::placeholder {
@@ -1179,13 +1216,13 @@ def load_css():
         }
 
         div[data-testid="stDialog"] div[data-testid="stButton"] button {
-            min-height: 42px !important;
-            height: 42px !important;
-            padding: 8px 28px !important;
-            font-size: 14.5px !important;
-            border-radius: 12px !important;
+            min-height: 38px !important;
+            height: 38px !important;
+            padding: 6px 24px !important;
+            font-size: 14px !important;
+            border-radius: 10px !important;
             width: auto !important;
-            min-width: 220px !important;
+            min-width: 180px !important;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
         }
 
@@ -2436,6 +2473,39 @@ def load_css():
             transform-origin: bottom right;
             animation: chatPanelPop 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
         }
+
+        /* --- Back to Top Button Styling --- */
+        .back-to-top-btn {
+            position: fixed;
+            right: 22px;
+            bottom: 18px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--leaf-primary), var(--leaf-primary-dark));
+            color: white;
+            border: 1px solid rgba(82,183,136,0.55);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .back-to-top-btn.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .back-to-top-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5);
+        }
         </style>
         <script>
         const initCounters = () => {
@@ -2509,9 +2579,34 @@ def load_css():
             }
         };
 
+        const initBackToTop = () => {
+            const btn = document.getElementById('backToTopBtn');
+            if (!btn || btn.dataset.initialized) return;
+            btn.dataset.initialized = 'true';
+
+            const scrollContainer = document.querySelector('[data-testid="stAppViewContainer"]') || window;
+            const scrollElement = scrollContainer === window ? document.documentElement : scrollContainer;
+
+            const toggleBtn = () => {
+                if (scrollElement.scrollTop > 400) {
+                    btn.classList.add('visible');
+                } else {
+                    btn.classList.remove('visible');
+                }
+            };
+
+            scrollContainer.addEventListener('scroll', toggleBtn, { passive: true });
+            toggleBtn(); // Check initial state on load
+
+            btn.addEventListener('click', () => {
+                scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        };
+
         const runObservers = () => {
             initCounters();
             initChatDrag();
+            initBackToTop();
         };
 
         // Initial run
