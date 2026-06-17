@@ -3,7 +3,7 @@ import os
 import re
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 import pandas as pd
 import streamlit as st
@@ -19,6 +19,9 @@ from frontend.components import (
     section_title,
     top_predictions_card,
 )
+
+# Define Indian Standard Time (IST) for accurate timestamps
+IST = timezone(timedelta(hours=5, minutes=30))
 
 @st.cache_data(ttl=300, show_spinner=False)
 def _fetch_history_cached(user_id):
@@ -288,7 +291,7 @@ def _generate_report_pdf(image_bytes, prediction, disease_info):
         canvas.setFillColor(colors.dimgrey)
         footer_text = f"Plantexa AI Report Card - Page {doc.page}"
         canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, footer_text)
-        date_str = datetime.now().strftime("%B %d, %Y")
+        date_str = datetime.now(IST).strftime("%B %d, %Y")
         canvas.drawString(0.5 * inch, 0.5 * inch, date_str)
         canvas.restoreState()
 
@@ -393,7 +396,7 @@ def _generate_history_pdf(history_data):
         canvas.setFillColor(colors.dimgrey)
         footer_text = f"Plantexa AI History - Page {doc.page}"
         canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, footer_text)
-        date_str = datetime.now().strftime("%B %d, %Y")
+        date_str = datetime.now(IST).strftime("%B %d, %Y")
         canvas.drawString(0.5 * inch, 0.5 * inch, date_str)
         canvas.restoreState()
 
@@ -449,7 +452,7 @@ def render_prediction_section(image_file):
                 st.session_state.prediction = result
 
                 new_record = {
-                    "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "Timestamp": datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S"),
                     "Disease": result["disease"],
                     "Confidence": result["confidence"],
                     "Image_URL": image_url,
@@ -462,7 +465,7 @@ def render_prediction_section(image_file):
                 st.session_state.prediction = None
 
                 new_record = {
-                    "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "Timestamp": datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S"),
                     "Disease": "Failed: Invalid Image (Not a Leaf)",
                     "Confidence": 0.0,
                     "Image_URL": image_url,
@@ -476,7 +479,7 @@ def render_prediction_section(image_file):
                 st.session_state.prediction = None
 
                 new_record = {
-                    "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "Timestamp": datetime.now(IST).strftime("%Y-%m-%d %H:%M:%S"),
                     "Disease": "Analysis Error",
                     "Confidence": 0.0,
                     "Image_URL": image_url,
@@ -770,6 +773,8 @@ def render_team_section():
         scroll-snap-align: center;
         perspective: 1000px;
         height: 350px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
     }}
     .team-card-inner {{
         position: relative;
@@ -954,26 +959,33 @@ def render_team_section():
 
     const teamGrid = document.getElementById('team-carousel');
     if (teamGrid) {{
-        window.teamCarouselInterval = setInterval(() => {{
-            if (teamGrid.scrollWidth > teamGrid.clientWidth) {{
-                const firstCard = teamGrid.querySelector('.team-card-container');
-                if (!firstCard) return;
-                const cardWidth = firstCard.offsetWidth + 16;
+        const startCarousel = () => {{
+            if (window.teamCarouselInterval) clearInterval(window.teamCarouselInterval);
 
-                teamGrid.scrollBy({{ left: cardWidth, behavior: 'smooth' }});
+            window.teamCarouselInterval = setInterval(() => {{
+                if (teamGrid.scrollWidth > teamGrid.clientWidth) {{
+                    const firstCard = teamGrid.querySelector('.team-card-container');
+                    if (!firstCard) return;
+                    const cardWidth = firstCard.offsetWidth + 16;
 
-                window.teamCarouselTimeout = setTimeout(() => {{
-                    teamGrid.style.scrollBehavior = 'auto';
-                    teamGrid.style.scrollSnapType = 'none';
-                    teamGrid.appendChild(firstCard);
-                    teamGrid.scrollLeft -= cardWidth;
-                    requestAnimationFrame(() => {{
-                        teamGrid.style.scrollBehavior = 'smooth';
-                        teamGrid.style.scrollSnapType = 'x mandatory';
-                    }});
-                }}, 600);
-            }}
-        }}, 2500); // <-- Adjust this number (in milliseconds) to change scroll speed
+                    teamGrid.scrollBy({{ left: cardWidth, behavior: 'smooth' }});
+
+                    window.teamCarouselTimeout = setTimeout(() => {{
+                        teamGrid.style.scrollBehavior = 'auto';
+                        teamGrid.style.scrollSnapType = 'none';
+                        firstCard.classList.remove('flipped');
+                        teamGrid.appendChild(firstCard);
+                        teamGrid.scrollLeft -= cardWidth;
+                        requestAnimationFrame(() => {{
+                            teamGrid.style.scrollBehavior = 'smooth';
+                            teamGrid.style.scrollSnapType = 'x mandatory';
+                        }});
+                    }}, 600);
+                }}
+            }}, 2500); // <-- Adjust this number (in milliseconds) to change scroll speed
+        }};
+
+        startCarousel();
 
         const stopCarousel = () => {{
             clearInterval(window.teamCarouselInterval);
@@ -984,6 +996,29 @@ def render_team_section():
         teamGrid.addEventListener('touchstart', stopCarousel, {{passive: true}});
         teamGrid.addEventListener('mousedown', stopCarousel);
         teamGrid.addEventListener('mouseenter', stopCarousel); // Pause on hover
+
+        /* Resume automatic swap when interaction ends */
+        teamGrid.addEventListener('touchend', startCarousel, {{passive: true}});
+        teamGrid.addEventListener('mouseup', startCarousel);
+        teamGrid.addEventListener('mouseleave', startCarousel); // Resume on mouse leave
+
+        /* Mobile click-to-flip handler */
+        const cards = teamGrid.querySelectorAll('.team-card-container');
+        cards.forEach(card => {{
+            card.addEventListener('click', () => {{
+                card.classList.toggle('flipped');
+            }});
+        }});
+
+        /* Auto-flip back down when scrolling out of view */
+        if ('IntersectionObserver' in window) {{
+            const observer = new IntersectionObserver((entries) => {{
+                entries.forEach(entry => {{
+                    if (!entry.isIntersecting) entry.target.classList.remove('flipped');
+                }});
+            }}, {{ root: teamGrid, threshold: 0.15 }});
+            cards.forEach(card => observer.observe(card));
+        }}
     }}
     </script>
     """)

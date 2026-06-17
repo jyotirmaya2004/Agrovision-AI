@@ -1,6 +1,7 @@
 import io
 import os
 import re
+from datetime import datetime, timezone, timedelta
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -18,6 +19,9 @@ Provide expert, scientifically accurate advice on plant diseases, crop care, fer
 Keep your responses extremely concise, using short bullet points and direct, actionable recommendations.
 If the user asks about topics outside of agriculture or botany, politely decline and steer the conversation back to plant health.
 """.strip()
+
+# Define Indian Standard Time (IST) for accurate timestamps on cloud servers
+IST = timezone(timedelta(hours=5, minutes=30))
 
 AVATAR_ROLES = {
     "🧑‍🌾": "Farmer",
@@ -200,7 +204,6 @@ def _generate_pdf_transcript(messages):
         from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
         from reportlab.lib import colors
         from reportlab.lib.units import inch
-        from datetime import datetime
     except ImportError:
         return None
 
@@ -333,7 +336,7 @@ def _generate_pdf_transcript(messages):
         canvas.setFillColor(colors.dimgrey)
         footer_text = f"Plantexa AI Chat Transcript - Page {doc.page}"
         canvas.drawCentredString(letter[0] / 2.0, 0.5 * inch, footer_text)
-        date_str = datetime.now().strftime("%B %d, %Y")
+        date_str = datetime.now(IST).strftime("%B %d, %Y")
         canvas.drawString(0.5 * inch, 0.5 * inch, date_str)
         canvas.restoreState()
 
