@@ -17,7 +17,7 @@ A production-ready Streamlit web application that first validates whether an upl
 ## Project Structure
 
 ```text
-LeafDiseaseApp/
+Plantexa AI/
 ├── app.py
 ├── backend/
 │   ├── disease_info.py

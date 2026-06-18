@@ -1,7 +1,14 @@
+import os
 import streamlit as st
 
 
 def load_css():
+    css_path = os.path.join(os.path.dirname(__file__), "main.css")
+    with open(css_path, "r", encoding="utf-8") as f:
+        css_content = f.read()
+
+    st.html(f"<style>\n{css_content}\n</style>")
+
     st.html(
         """
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
