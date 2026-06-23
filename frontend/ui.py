@@ -187,12 +187,12 @@ def render_navbar(current_page: str = "Home"):
 
             <div class="nav-right">
                 <div class="nav-links" role="navigation" aria-label="Primary">
-                    <a href="/" class="nav-link{' active' if current_page == 'Home' else ''}">{_t('Home')}</a>
-                    <a href="/Dataset" class="nav-link{' active' if current_page == 'Dataset' else ''}">{_t('Dataset')}</a>
+                    <a href="/" class="nav-link{' active' if current_page == 'Home' else ''}" target="_self">{_t('Home')}</a>
+                    <a href="/Dataset" class="nav-link{' active' if current_page == 'Dataset' else ''}" target="_self">{_t('Dataset')}</a>
                     <a href="{history_link}" class="nav-link{' active' if current_page == 'History' else ''}">{_t('History')}</a>
                     <a href="{team_link}" class="nav-link{' active' if current_page == 'Team' else ''}">{_t('Team')}</a>
-                    <a href="/About" class="nav-link{' active' if current_page == 'About' else ''}">{_t('About')}</a>
-                    <a href="/Admin" class="nav-link{' active' if current_page == 'Admin' else ''}">{_t('Admin')}</a>
+                    <a href="/About" class="nav-link{' active' if current_page == 'About' else ''}" target="_self">{_t('About')}</a>
+                    <a href="/Admin" class="nav-link{' active' if current_page == 'Admin' else ''}" target="_self">{_t('Admin')}</a>
                 </div>
 
                 <div class="lang-dropdown-container desktop-lang-toggle">
@@ -218,12 +218,12 @@ def render_navbar(current_page: str = "Home"):
 
         <div class="mobile-dropdown" role="dialog" aria-label="Mobile navigation">
             <div class="mobile-nav-links">
-                <a href="/" class="nav-link mobile-nav-link{' active' if current_page == 'Home' else ''}"><i class="fa-solid fa-house" style="margin-right: 8px;"></i> {_t('Home')}</a>
-                <a href="/Dataset" class="nav-link mobile-nav-link{' active' if current_page == 'Dataset' else ''}"><i class="fa-solid fa-database" style="margin-right: 8px;"></i> {_t('Dataset')}</a>
+                <a href="/" class="nav-link mobile-nav-link{' active' if current_page == 'Home' else ''}" target="_self"><i class="fa-solid fa-house" style="margin-right: 8px;"></i> {_t('Home')}</a>
+                <a href="/Dataset" class="nav-link mobile-nav-link{' active' if current_page == 'Dataset' else ''}" target="_self"><i class="fa-solid fa-database" style="margin-right: 8px;"></i> {_t('Dataset')}</a>
                 <a href="{history_link}" class="nav-link mobile-nav-link{' active' if current_page == 'History' else ''}"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 8px;"></i> {_t('History')}</a>
                 <a href="{team_link}" class="nav-link mobile-nav-link{' active' if current_page == 'Team' else ''}"><i class="fa-solid fa-users" style="margin-right: 8px;"></i> {_t('Team')}</a>
-                <a href="/About" class="nav-link mobile-nav-link{' active' if current_page == 'About' else ''}"><i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> {_t('About')}</a>
-                <a href="/Admin" class="nav-link mobile-nav-link{' active' if current_page == 'Admin' else ''}"><i class="fa-solid fa-lock" style="margin-right: 8px;"></i> {_t('Admin')}</a>
+                <a href="/About" class="nav-link mobile-nav-link{' active' if current_page == 'About' else ''}" target="_self"><i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> {_t('About')}</a>
+                <a href="/Admin" class="nav-link mobile-nav-link{' active' if current_page == 'Admin' else ''}" target="_self"><i class="fa-solid fa-lock" style="margin-right: 8px;"></i> {_t('Admin')}</a>
 
                 <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 4px 0;"></div>
                 <div style="padding: 4px 14px 0; font-size: 13px; color: var(--leaf-muted); font-weight: 600; text-transform: uppercase;">{_t('Language')}</div>

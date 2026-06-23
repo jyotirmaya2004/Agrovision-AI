@@ -1060,20 +1060,20 @@ def render_footer():
                 <!-- Column 2: Navigation -->
                 <div class="footer-col">
                     <h4 class="f-heading">{_t('Navigation')}</h4>
-                    <a href="/" class="f-link">{_t('Home')}</a>
+                    <a href="/" class="f-link" target="_self">{_t('Home')}</a>
                     <a href="#diagnosis-section" class="f-link">{_t('Disease Detection')}</a>
                     <a href="#history-section" class="f-link">{_t('Prediction History')}</a>
                     <a href="#team-section" class="f-link">{_t('Team')}</a>
-                    <a href="/Admin" class="f-link">{_t('Admin')}</a>
+                    <a href="/Admin" class="f-link" target="_self">{_t('Admin')}</a>
                 </div>
 
                 <!-- Column 3: Resources -->
                 <div class="footer-col">
                     <h4 class="f-heading">{_t('Resources')}</h4>
-                    <a href="/About" class="f-link">{_t('About Plantexa AI')}</a>
-                    <a href="/Dataset" class="f-link">{_t('Dataset Information')}</a>
-                    <a href="#" class="f-link">{_t('User Guide')}</a>
-                    <a href="#" class="f-link">FAQ</a>
+                    <a href="/About" class="f-link" target="_self">{_t('About Plantexa AI')}</a>
+                    <a href="/Dataset" class="f-link" target="_self">{_t('Dataset Information')}</a>
+                    <a href="/About" class="f-link" target="_self">{_t('User Guide')}</a>
+                    <a href="/About" class="f-link" target="_self">FAQ</a>
                     <a href="#" class="f-link">{_t('Privacy Policy')}</a>
                     <a href="#" class="f-link">{_t('Terms & Conditions')}</a>
                 </div>
